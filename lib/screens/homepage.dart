@@ -12,6 +12,20 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   late Future<List<Product>> _product;
   List<Product> selectedProducts = [];
+  final TextEditingController nominalController = TextEditingController();
+
+  double totalHarga() {
+    return selectedProducts.fold(0, (sum, product) {
+      return sum + (product.harga! * product.quantity);
+    });
+  }
+
+  double subTotalHarga() {
+    double totalHarga = selectedProducts.fold(0, (sum, product) {
+      return sum + (product.harga! * product.quantity);
+    });
+    return totalHarga + 3000;
+  }
 
   void tambah(Product product) {
     setState(() {
@@ -25,6 +39,454 @@ class _HomepageState extends State<Homepage> {
         product.quantity--;
       });
     }
+  }
+
+  // pop up
+  void _popupKonfirBayar(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: Color(0xffE22323),
+                width: 2,
+              ),
+            ),
+            content: Stack(
+              children: [
+                Container(
+                  width: size.width * 0.3,
+                  height: size.height * 0.4,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: size.width * 0.05,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Total Pesanan',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            color: Color(0xff0C085C),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(
+                          height: size.height * 0.05,
+                        ),
+                        Expanded(
+                          child: Container(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Total Harga:'),
+                                    Text('Rp. ${totalHarga()}'),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Biaya Layanan:'),
+                                    Text('Rp. 3000'),
+                                  ],
+                                ),
+                                Divider(thickness: 1, color: Colors.grey),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Subtotal:',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Rp ${subTotalHarga()}',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: size.width * 0.03),
+                          child: Container(
+                            width: size.width * 0.2,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _popupNominalBayar(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xffE22323),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: Text(
+                                "Bayar",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Color(0xffE22323),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Tutup popup
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void _popupNominalBayar(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: Color(0xffE22323),
+              width: 2,
+            ),
+          ),
+          content: Stack(
+            children: [
+              Container(
+                width: size.width * 0.4,
+                height: size.height * 0.5,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.width * 0.05,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calculate_outlined,
+                            color: Color(0xffE22323),
+                            size: 40,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            "Masukan Nominal",
+                            style: TextStyle(
+                              color: Color(0xff0C085C),
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      // TextField untuk input nominal
+                      TextField(
+                        controller: nominalController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          hintText: "Rp. ",
+                          prefixText: "Rp. ",
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      // Tombol Bayar
+                      Container(
+                        width: size.width * 0.2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            String inputNominal = nominalController.text.trim();
+                            if (inputNominal.isNotEmpty) {
+                              double? nominal = double.tryParse(inputNominal);
+                              if (nominal != null && nominal > 0) {
+                                // Lakukan sesuatu dengan nominal yang dimasukkan
+                                print("Nominal: Rp. $nominal");
+                                _popupBayarBerhasil(context);
+                              } else {
+                                // Tampilkan pesan error jika input tidak valid
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content:
+                                        Text("Masukkan nominal yang valid!"),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xffE22323),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: Text(
+                            "Bayar",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: Color(0xffE22323),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Tutup popup
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _popupBayarBerhasil(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: Color(0xffE22323),
+                width: 2,
+              ),
+            ),
+            content: Stack(
+              children: [
+                Container(
+                  width: size.width * 0.4,
+                  height: size.height * 0.6,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: size.width * 0.06,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset("assets/images/Subtract.png"),
+                        Text(
+                          'Pembayaran Berhasil !',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            color: Color(0xff0C085C),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(
+                          height: size.height * 0.1,
+                        ),
+                        Expanded(
+                          child: Container(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Total Harga:'),
+                                    Text('Rp. ${totalHarga()}'),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Biaya Layanan:'),
+                                    Text('Rp. 3000'),
+                                  ],
+                                ),
+                                Divider(thickness: 1, color: Colors.grey),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Subtotal:',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Rp ${subTotalHarga()}',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Jumlah Uang:',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Rp isi pan',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Kembalian:',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Rp isi pan',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: size.width * 0.03),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: size.width * 0.1,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Homepage()),
+                                      (Route<dynamic> route) =>
+                                          false, // Kondisi untuk menghapus semua rute sebelumnya
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xffE22323),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.storefront_outlined,
+                                        color: Colors.white,
+                                      ),
+                                      Text(
+                                        "Home",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xffE22323),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.print,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Color(0xffE22323),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Tutup popup
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   @override
@@ -307,6 +769,7 @@ class _HomepageState extends State<Homepage> {
                               itemCount: selectedProducts.length,
                               itemBuilder: (context, index) {
                                 final products = selectedProducts[index];
+
                                 return Padding(
                                   padding: EdgeInsets.only(
                                       bottom: size.height * 0.015),
@@ -469,7 +932,7 @@ class _HomepageState extends State<Homepage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "4 Items",
+                                        "${selectedProducts.length} Items",
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w700,
@@ -477,7 +940,7 @@ class _HomepageState extends State<Homepage> {
                                         ),
                                       ),
                                       Text(
-                                        "Rp. 24.000",
+                                        "${totalHarga().toString()}",
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
@@ -489,7 +952,9 @@ class _HomepageState extends State<Homepage> {
                                 ),
                                 //button
                                 ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    _popupKonfirBayar(context);
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
