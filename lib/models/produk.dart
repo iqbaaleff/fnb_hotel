@@ -6,6 +6,7 @@ class Product {
   final int? harga;
   final int? jumlah;
   final String kategoriProduk;
+   int quantity;
 
   Product({
     this.id,
@@ -15,6 +16,8 @@ class Product {
     this.harga,
     this.jumlah,
     required this.kategoriProduk,
+    this.quantity = 1,
+    
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -26,6 +29,7 @@ class Product {
       harga: json['harga'] ?? 0,
       jumlah: json['jumlah'] ?? 1,
       kategoriProduk: json['kategori_produk'] ?? 'Tanpa Kategori',
+      quantity: 1,
     );
   }
 }
