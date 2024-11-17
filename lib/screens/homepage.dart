@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fnb_hotel/api_services.dart';
 import 'package:fnb_hotel/models/produk.dart';
+import 'package:fnb_hotel/screens/cemilan.dart';
+import 'package:fnb_hotel/screens/coffe.dart';
+import 'package:fnb_hotel/widgets/order_menu.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -10,7 +13,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  late Future<List<Product>> _product;
+  int _currentIndex = 0;
   List<Product> selectedProducts = [];
   final TextEditingController nominalController = TextEditingController();
 
@@ -41,8 +44,14 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  void onProductSelected(Product product) {
+    setState(() {
+      selectedProducts.add(product);
+    });
+  }
+
   // pop up
-  void _popupKonfirBayar(BuildContext context) {
+  void popupKonfirBayar(BuildContext context) {
     final size = MediaQuery.of(context).size;
     showDialog(
         context: context,
@@ -224,7 +233,6 @@ class _HomepageState extends State<Homepage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          hintText: "Rp. ",
                           prefixText: "Rp. ",
                         ),
                       ),
@@ -470,29 +478,10 @@ class _HomepageState extends State<Homepage> {
                     ),
                   ),
                 ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      color: Color(0xffE22323),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Tutup popup
-                    },
-                  ),
-                ),
               ],
             ),
           );
         });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _product = ApiService().getProductsTanaman();
   }
 
   @override
@@ -524,7 +513,6 @@ class _HomepageState extends State<Homepage> {
                               horizontal: size.width * 0.01),
                           child: Image.asset("assets/images/logo.png"),
                         ),
-
                         // Fnb text
                         Text(
                           "Food & Beverage",
@@ -534,7 +522,6 @@ class _HomepageState extends State<Homepage> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        // Search bar
                       ],
                     ),
                   ),
@@ -547,437 +534,66 @@ class _HomepageState extends State<Homepage> {
                     flex: 9,
                     child: Row(
                       children: [
+                        // ListView with menu items
                         Expanded(
-                          flex: 3,
-                          child: Container(
-                            width: size.width,
-                            height: size.height,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 8,
-                          child: Container(
-                            width: size.width,
-                            height: size.height,
-                            decoration: BoxDecoration(
-                              color: Color(0xffF4F4F4),
-                              border: Border(
-                                left: BorderSide(
-                                  color: Color(0xff8B8B8B),
-                                  width: 1,
+                          flex: 2,
+                          child: ListView(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _currentIndex = 0;
+                                  });
+                                },
+                                child: ListTile(
+                                  title: Text("Cemilan"),
                                 ),
                               ),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: size.width * 0.005),
-                              child: FutureBuilder<List<Product>>(
-                                  future: _product,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      return Center(
-                                          child:
-                                              Text('Error: ${snapshot.error}'));
-                                    } else if (!snapshot.hasData ||
-                                        snapshot.data!.isEmpty) {
-                                      return Center(
-                                          child: Text('No products available'));
-                                    }
-
-                                    final produk = snapshot.data;
-
-                                    return GridView.builder(
-                                      gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisSpacing: 10,
-                                        mainAxisSpacing: 5,
-                                        crossAxisCount: 4,
-                                        childAspectRatio: 0.95,
-                                      ),
-                                      itemCount: 10,
-                                      itemBuilder: (context, index) {
-                                        final products = produk![index];
-                                        return GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              selectedProducts.add(
-                                                  products); // Tambahkan produk yang dipilih ke daftar
-                                            });
-                                          },
-                                          child: Card(
-                                            color: Colors.white,
-                                            elevation: 2,
-                                            child: Column(
-                                              children: [
-                                                Expanded(
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    child:
-                                                        products.fotoProduk !=
-                                                                    null &&
-                                                                products
-                                                                    .fotoProduk!
-                                                                    .isNotEmpty
-                                                            ? Image.network(
-                                                                'https://74gslzvj-8000.asse.devtunnels.ms${products.fotoProduk}',
-                                                                fit:
-                                                                    BoxFit.fill,
-                                                                width: double
-                                                                    .infinity,
-                                                              )
-                                                            : Container(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                child: Icon(Icons
-                                                                    .image_not_supported),
-                                                              ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      left: size.width * 0.007,
-                                                      right: size.width * 0.007,
-                                                      bottom:
-                                                          size.height * 0.02),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Padding(
-                                                        padding: EdgeInsets.only(
-                                                            top: size.height *
-                                                                0.005),
-                                                        child: Padding(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  vertical: size
-                                                                          .height *
-                                                                      0.005),
-                                                          child: Text(
-                                                            products
-                                                                .judulProduk,
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: TextStyle(
-                                                              color: Color(
-                                                                  0xff0C085C),
-                                                              fontSize: 15,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        "Rp. ${products.harga.toString()}",
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors
-                                                              .grey.shade600,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }),
-                            ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _currentIndex = 1;
+                                  });
+                                },
+                                child: ListTile(
+                                  title: Text("Coffee"),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Menu display area (IndexedStack)
+                        Expanded(
+                          flex: 6,
+                          child: IndexedStack(
+                            index: _currentIndex,
+                            children: [
+                              Cemilan(
+                                size: size,
+                                onProductSelected: onProductSelected,
+                              ),
+                              Coffe(
+                                size: size,
+                                onProductSelected: onProductSelected,
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
-            // Order Menu
-            Container(
-              width: size.width * 0.26,
-              height: size.height,
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: Color(0xff8B8B8B),
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(left: size.width * 0.01),
-                child: Column(
-                  children: [
-                    // Bar Atas
-                    Expanded(
-                      flex: 1,
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: size.width * 0.01),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Color(0xffE22323),
-                              ),
-                              child: Image.asset(
-                                "assets/images/clipboard.png",
-                                height: size.height * 0.047,
-                                width: size.width * 0.027,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Order Menu",
-                              style: TextStyle(
-                                color: Color(0xff0C085C),
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.more_vert),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Divider(
-                      color: Color(0xff8B8B8B),
-                      height: 10,
-                    ),
-                    // Cart
-                    Expanded(
-                      flex: 7,
-                      child: selectedProducts.isNotEmpty
-                          ? ListView.builder(
-                              padding: EdgeInsets.all(10),
-                              itemCount: selectedProducts.length,
-                              itemBuilder: (context, index) {
-                                final products = selectedProducts[index];
 
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                      bottom: size.height * 0.015),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Color(0xffE22323),
-                                          width: 2,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(15)),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 0,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              bottomLeft: Radius.circular(15),
-                                            ),
-                                            child: Container(
-                                              height: size.height * 0.11,
-                                              width: size.width * 0.01,
-                                              color: Color(0xffE22323),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Container(
-                                            child: Row(
-                                              children: [
-                                                products.fotoProduk != null &&
-                                                        products.fotoProduk!
-                                                            .isNotEmpty
-                                                    ? Image.network(
-                                                        'https://74gslzvj-8000.asse.devtunnels.ms${products.fotoProduk}',
-                                                        fit: BoxFit.contain,
-                                                        width:
-                                                            size.width * 0.05,
-                                                        height:
-                                                            size.height * 0.11,
-                                                      )
-                                                    : Icon(
-                                                        Icons
-                                                            .image_not_supported,
-                                                        size: 100,
-                                                        color: Colors.grey[400],
-                                                      ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Container(
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      products.judulProduk,
-                                                      style: TextStyle(
-                                                        color:
-                                                            Color(0xff0C085C),
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Rp. ${products.harga.toString()}",
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors
-                                                            .grey.shade600,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Container(
-                                            child: Row(
-                                              children: [
-                                                // -
-                                                IconButton(
-                                                  onPressed: () {
-                                                    kurang(products);
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.remove_circle,
-                                                    color: Color(0xffE22323),
-                                                  ),
-                                                ),
-                                                // angka
-                                                Text(products.quantity
-                                                    .toString()),
-                                                // +
-                                                IconButton(
-                                                  onPressed: () {
-                                                    tambah(products);
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.add_circle,
-                                                    color: Color(0xffE22323),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            )
-                          : Center(
-                              child: Text("Pilih sebuah produk"),
-                            ),
-                    ),
-                    Divider(
-                      color: Color(0xff8B8B8B),
-                      height: 10,
-                    ),
-                    // Button Order
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: size.height * 0.04,
-                          horizontal: size.width * 0.01,
-                        ),
-                        child: Container(
-                          width: size.width,
-                          height: size.height,
-                          decoration: BoxDecoration(
-                            color: Color(0xffE22323),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: size.width * 0.01),
-                            child: Row(
-                              children: [
-                                // pcs + total harga
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${selectedProducts.length} Items",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white.withOpacity(0.3),
-                                        ),
-                                      ),
-                                      Text(
-                                        "${totalHarga().toString()}",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                //button
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _popupKonfirBayar(context);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "Order",
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.black),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            // Order Menu
+            OrderMenu(
+              selectedProducts: selectedProducts,
+              size: size,
+              totalHarga: totalHarga,
+              popupKonfirBayar: popupKonfirBayar,
+              kurang: kurang,
+              tambah: tambah,
             ),
           ],
         ),
