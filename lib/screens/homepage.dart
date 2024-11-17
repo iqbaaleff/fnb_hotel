@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fnb_hotel/api_services.dart';
+
 import 'package:fnb_hotel/models/produk.dart';
 import 'package:fnb_hotel/screens/cemilan.dart';
 import 'package:fnb_hotel/screens/coffe.dart';
@@ -497,7 +497,7 @@ class _HomepageState extends State<Homepage> {
           children: [
             // Bagian Kiri
             Container(
-              width: size.width * 0.72,
+              width: size.width * 0.7,
               height: size.height,
               child: Column(
                 children: [

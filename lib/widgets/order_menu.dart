@@ -21,7 +21,7 @@ class OrderMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size.width * 0.26,
+      width: size.width * 0.28,
       height: size.height,
       decoration: BoxDecoration(
         border: Border(
