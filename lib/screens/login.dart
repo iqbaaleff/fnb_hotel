@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/screens/homepage.dart';
+import 'package:fnb_hotel/admin/sidebar.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,47 +15,81 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final Dio _dio = Dio(); // Menggunakan plugin Dio untuk menghubungkan server
-
-  bool _isLoading = false; // Status untuk tombol loading
-  bool _secureText = true;
+  final Dio _dio = Dio();
+  bool _isLoading = false;
+  bool _secureText = false;
 
   void _login() async {
     setState(() {
-      _isLoading = true; // Menampilkan loading indicator
+      _isLoading = true;
     });
 
-    final username = usernameController.text;
-    final password = passwordController.text;
+    final username = usernameController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username dan Password wajib diisi')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
 
     try {
       final response = await _dio.post(
-        'https://74gslzvj-8000.asse.devtunnels.ms/api/login', // URL API
+        'https://xrzwvx14-5000.asse.devtunnels.ms/api/login', // Ganti dengan endpoint login backend Anda
         data: {
           'username': username,
           'password': password,
         },
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
       );
+
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login berhasil')),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Homepage(), // Pindah halaman jika berhasil
-          ),
-        );
+        final role = response.data['user']['role'];
+        final token = response.data['token'];
+
+        // Simpan token dan role ke SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('role', role);
+
+        // Navigasi berdasarkan role
+        if (role == 'kasir') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Homepage()),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login sebagai Kasir berhasil')),
+          );
+        } else if (role == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SidebarAdmin(isAdmin: true),
+            ),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login sebagai Admin berhasil')),
+          );
+        } else {
+          throw Exception('Role tidak dikenali');
+        }
       } else {
-        throw Exception("Login gagal");
+        throw Exception('Login gagal, periksa kredensial Anda');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login gagal')),
+        SnackBar(content: Text('Login gagal: ${e.toString()}')),
       );
     } finally {
       setState(() {
-        _isLoading = false; // Sembunyikan loading indicator
+        _isLoading = false;
       });
     }
   }
@@ -63,6 +98,20 @@ class _LoginState extends State<Login> {
     setState(() {
       _secureText = !_secureText;
     });
+  }
+
+  Future<void> _checkToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Token: $token')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token tidak ditemukan')),
+      );
+    }
   }
 
   @override
@@ -135,20 +184,18 @@ class _LoginState extends State<Login> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _isLoading
-                          ? null
-                          : _login, // Nonaktifkan tombol saat loading
+                      onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero, // Hapus padding default
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        elevation: 0, // Sesuaikan bayangan
+                        elevation: 0,
                       ),
                       child: Container(
                         width: size.width * 0.1,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             colors: [Color(0xFFF48181), Color(0xFFED3838)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -159,9 +206,8 @@ class _LoginState extends State<Login> {
                         alignment: Alignment.center,
                         child: _isLoading
                             ? const CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               )
                             : Text(
                                 "Login",
@@ -222,9 +268,9 @@ class _LoginState extends State<Login> {
       child: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
-                image: const AssetImage('assets/images/hotel.png'),
+                image: AssetImage('assets/images/hotel.png'),
                 fit: BoxFit.cover,
               ),
             ),
