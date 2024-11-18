@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fnb_hotel/models/produk.dart';
 import 'package:fnb_hotel/screens/cemilan.dart';
 import 'package:fnb_hotel/screens/coffe.dart';
-import 'package:fnb_hotel/widgets/order_menu.dart';
+import 'package:fnb_hotel/screens/order_menu.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
