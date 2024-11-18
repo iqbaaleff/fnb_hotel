@@ -1,56 +1,41 @@
 import 'package:dio/dio.dart';
 import 'package:fnb_hotel/models/produk.dart';
 
-
 class ApiService {
   final Dio _dio = Dio();
 
-  //API Tanaman
-  Future<List<Product>> getProductsTanaman() async {
+  //API Cemilan
+  Future<List<Product>> getProductsCemilan() async {
     const String url =
-        'https://74gslzvj-8000.asse.devtunnels.ms/api/filterdanGet?kategori=tanaman';
+        'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk/cemilan';
 
     try {
       Response response = await _dio.get(url);
-      print(response.data);
-      List<dynamic> data = response.data;
 
-      // Konversi data JSON menjadi daftar objek Product
-      return data.map((json) => Product.fromJson(json)).toList();
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        List<dynamic> data = response.data['data'];
+        return data.map((product) => Product.fromJson(product)).toList();
+      } else {
+        throw Exception('Failed to load products');
+      }
     } catch (e) {
       throw Exception('Failed to load products: $e');
     }
   }
-
-  //API Ikan
-  Future<List<Product>> getProductsIkan() async {
+  //API Coffe
+  Future<List<Product>> getProductsCoffe() async {
     const String url =
-        'https://74gslzvj-8000.asse.devtunnels.ms/api/filterdanGet?kategori=ikan';
+        'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk/coffe';
 
     try {
       Response response = await _dio.get(url);
-      print(response.data);
-      List<dynamic> data = response.data;
 
-      // Konversi data JSON menjadi daftar objek Product
-      return data.map((json) => Product.fromJson(json)).toList();
-    } catch (e) {
-      throw Exception('Failed to load products: $e');
-    }
-  }
-
-  //API Burung
-  Future<List<Product>> getProductsBurung() async {
-    const String url =
-        'https://74gslzvj-8000.asse.devtunnels.ms/api/filterdanGet?kategori=burung';
-
-    try {
-      Response response = await _dio.get(url);
-      print(response.data);
-      List<dynamic> data = response.data;
-
-      // Konversi data JSON menjadi daftar objek Product
-      return data.map((json) => Product.fromJson(json)).toList();
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        List<dynamic> data = response.data['data'];
+        return data.map((product) => Product.fromJson(product)).toList();
+      } else {
+        throw Exception('Failed to load products');
+      }
     } catch (e) {
       throw Exception('Failed to load products: $e');
     }
