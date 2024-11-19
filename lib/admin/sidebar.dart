@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fnb_hotel/admin/sidebarScreen/pemasukan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/admin/sidebarScreen/addProduct.dart';
 import 'package:fnb_hotel/admin/sidebarScreen/akun.dart';
@@ -19,12 +20,19 @@ class _SidebarAdminState extends State<SidebarAdmin> {
   String? _token; // Variabel untuk menyimpan token
 
   // Daftar untuk judul, ikon, dan halaman yang akan dipilih
-  final List<String> _titles = ['Product', 'Riwayat', 'Akun', 'Logout'];
+  final List<String> _titles = [
+    'Product',
+    'Riwayat',
+    'Akun',
+    'Logout',
+    //'Tranksaksi'
+  ];
   final List<IconData> _icons = [
     Icons.production_quantity_limits,
     Icons.history,
     Icons.account_circle,
-    Icons.logout_outlined
+    Icons.logout_outlined,
+    // Icons.bloodtype_rounded
   ];
 
   // Membuat variabel untuk menyimpan halaman yang dipilih
@@ -41,6 +49,7 @@ class _SidebarAdminState extends State<SidebarAdmin> {
       Riwayat(),
       Akun(),
       LogoutAdmin(),
+      // PemasukanPage(),
     ];
   }
 

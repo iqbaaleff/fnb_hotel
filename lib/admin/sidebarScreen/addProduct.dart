@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:fnb_hotel/admin/sidebarScreen/ProductList.dart';
+import 'package:fnb_hotel/admin/sidebarScreen/produkList/ProductList.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,8 +25,7 @@ class _AddProductState extends State<AddProduct> {
   final ImagePicker _picker = ImagePicker(); // Instance ImagePicker
 
   // API Endpoint
-  final String apiUrl =
-      'https://74gslzvj-3000.asse.devtunnels.ms/api/produk'; // Ganti dengan URL Express Anda
+  final String apiUrl = 'https://74gslzvj-3000.asse.devtunnels.ms/api/produk';
 
   // Fungsi untuk mengambil token dari SharedPreferences
   Future<String?> _getToken() async {
