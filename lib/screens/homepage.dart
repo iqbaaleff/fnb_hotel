@@ -15,9 +15,16 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  String _selectedCategory = "Makanan";
+  String _selectedCategory = "";
   int _currentIndex = 0;
+  int? _currentIndexMakanan;
+  int? _currentIndexMinuman;
   List<Product> selectedProducts = [];
+
+  Map<String, List<String>> kategori = {
+    "makanan": ["Cemilan", "Mie Ayam", "Rendang", "Sate", "Bakso"],
+    "minuman": ["Teh Manis", "Kopi", "Jus Jeruk", "Air Mineral", "Es Teh"]
+  };
 
   final ApiService apiService = ApiService();
 
@@ -520,6 +527,8 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    List<String> makanan = kategori["makanan"] ?? [];
+    List<String> minuman = kategori["minuman"] ?? [];
 
     return Scaffold(
       body: Padding(
@@ -592,35 +601,38 @@ class _HomepageState extends State<Homepage> {
                                 ],
                               ),
                               Expanded(
-                                child: ListView(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedCategory =
-                                              "Makanan"; // Set kategori ke "Makanan"
-                                          _currentIndex =
-                                              0; // Tampilkan halaman pertama kategori "Makanan"
-                                        });
-                                      },
+                                child: ListView.builder(
+                                  itemCount: makanan.length,
+                                  itemBuilder: (context, index) {
+                                    final item = makanan[index];
+                                    final isSelected =
+                                        _currentIndexMakanan == index;
+
+                                    return Container(
+                                      color: isSelected
+                                          ? Color(0xffE22323)
+                                          : Colors
+                                              .transparent, // Abu-abu jika dipilih
                                       child: ListTile(
-                                        title: Text("Cemilan"),
+                                        title: Text(
+                                          item,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedCategory = "Makanan";
+                                            _currentIndexMakanan = index;
+                                            _currentIndexMinuman == null;
+                                            _currentIndex = index;
+                                          });
+                                        },
                                       ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedCategory =
-                                              "Makanan"; // Set kategori ke "Makanan"
-                                          _currentIndex =
-                                              1; // Tampilkan halaman kedua kategori "Makanan" (Makanan Berat)
-                                        });
-                                      },
-                                      child: ListTile(
-                                        title: Text("Makanan Berat"),
-                                      ),
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 ),
                               ),
                               // Kategori Minuman
@@ -643,22 +655,38 @@ class _HomepageState extends State<Homepage> {
                                 ],
                               ),
                               Expanded(
-                                child: ListView(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedCategory =
-                                              "Minuman"; // Set kategori ke "Minuman"
-                                          _currentIndex =
-                                              0; // Tampilkan halaman pertama kategori "Minuman"
-                                        });
-                                      },
+                                child: ListView.builder(
+                                  itemCount: minuman.length,
+                                  itemBuilder: (context, index) {
+                                    final item = minuman[index];
+                                    final isSelected =
+                                        _currentIndexMinuman == index;
+
+                                    return Container(
+                                      color: isSelected
+                                          ? Color(0xffE22323)
+                                          : Colors
+                                              .transparent, // Abu-abu jika dipilih
                                       child: ListTile(
-                                        title: Text("Coffee"),
+                                        title: Text(
+                                          item,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedCategory = "Minuman";
+                                            _currentIndexMinuman = index;
+                                            _currentIndexMakanan == null;
+                                            _currentIndex = index;
+                                          });
+                                        },
                                       ),
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 ),
                               ),
                             ],
