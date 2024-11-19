@@ -2,28 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:fnb_hotel/api_services.dart';
 import 'package:fnb_hotel/models/produk.dart';
 
-class Cemilan extends StatefulWidget {
+class MakananBerat extends StatefulWidget {
   final Size size;
 
   final Function(Product) onProductSelected;
 
-  Cemilan({
+  MakananBerat({
     Key? key,
     required this.size,
     required this.onProductSelected,
   }) : super(key: key);
 
   @override
-  State<Cemilan> createState() => _CemilanState();
+  State<MakananBerat> createState() => _MakananBeratState();
 }
 
-class _CemilanState extends State<Cemilan> {
+class _MakananBeratState extends State<MakananBerat> {
   late Future<List<Product>> _product;
 
   @override
   void initState() {
     super.initState();
-    _product = ApiService().getProductsCemilan();
+    _product = ApiService().getProductsCoffe();
   }
 
   @override

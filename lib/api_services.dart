@@ -7,7 +7,7 @@ class ApiService {
   //API Cemilan
   Future<List<Product>> getProductsCemilan() async {
     const String url =
-        'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk/cemilan';
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/cemilan';
 
     try {
       Response response = await _dio.get(url);
@@ -22,10 +22,11 @@ class ApiService {
       throw Exception('Failed to load products: $e');
     }
   }
+
   //API Coffe
   Future<List<Product>> getProductsCoffe() async {
     const String url =
-        'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk/coffe';
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/coffe';
 
     try {
       Response response = await _dio.get(url);

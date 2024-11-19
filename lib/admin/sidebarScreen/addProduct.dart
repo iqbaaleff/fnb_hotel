@@ -24,7 +24,7 @@ class _AddProductState extends State<AddProduct> {
 
   // API Endpoint
   final String apiUrl =
-      'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk'; // Ganti dengan URL Express Anda
+      'https://74gslzvj-3000.asse.devtunnels.ms/api/produk'; // Ganti dengan URL Express Anda
 
   // Fungsi untuk mengunggah data ke API
   Future<void> _submitForm() async {

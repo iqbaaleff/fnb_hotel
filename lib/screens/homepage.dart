@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fnb_hotel/api_services.dart';
 
 import 'package:fnb_hotel/models/produk.dart';
+import 'package:fnb_hotel/screens/berat.dart';
 import 'package:fnb_hotel/screens/cemilan.dart';
 import 'package:fnb_hotel/screens/coffe.dart';
 import 'package:fnb_hotel/screens/order_menu.dart';
@@ -13,9 +15,14 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  String _selectedCategory = "Makanan";
   int _currentIndex = 0;
   List<Product> selectedProducts = [];
+
+  final ApiService apiService = ApiService();
+
   final TextEditingController nominalController = TextEditingController();
+  final TextEditingController aNamaController = TextEditingController();
 
   double totalHarga() {
     return selectedProducts.fold(0, (sum, product) {
@@ -68,7 +75,7 @@ class _HomepageState extends State<Homepage> {
               children: [
                 Container(
                   width: size.width * 0.3,
-                  height: size.height * 0.4,
+                  height: size.height * 0.5,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: size.width * 0.05,
@@ -86,8 +93,34 @@ class _HomepageState extends State<Homepage> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(
-                          height: size.height * 0.05,
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: size.height * 0.03),
+                          child: TextField(
+                            controller: aNamaController,
+                            decoration: InputDecoration(
+                              labelText: 'Nama Pemesan',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                    color: Color(
+                                        0xffE22323)), // Border warna merah saat tidak fokus
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                    color: Color(0xffE22323),
+                                    width: 2), // Border warna merah saat fokus
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                            ),
+                          ),
                         ),
                         Expanded(
                           child: Container(
@@ -497,7 +530,7 @@ class _HomepageState extends State<Homepage> {
           children: [
             // Bagian Kiri
             Container(
-              width: size.width * 0.7,
+              width: size.width * 0.6,
               height: size.height,
               child: Column(
                 children: [
@@ -537,45 +570,123 @@ class _HomepageState extends State<Homepage> {
                         // ListView with menu items
                         Expanded(
                           flex: 2,
-                          child: ListView(
+                          child: Column(
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _currentIndex = 0;
-                                  });
-                                },
-                                child: ListTile(
-                                  title: Text("Cemilan"),
+                              // Kategori Makanan
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: size.width * 0.01),
+                                    child:
+                                        Image.asset("assets/images/rice 1.png"),
+                                  ),
+                                  Text(
+                                    "Makanan",
+                                    style: TextStyle(
+                                      color: Color(0xff0C085C),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Expanded(
+                                child: ListView(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCategory =
+                                              "Makanan"; // Set kategori ke "Makanan"
+                                          _currentIndex =
+                                              0; // Tampilkan halaman pertama kategori "Makanan"
+                                        });
+                                      },
+                                      child: ListTile(
+                                        title: Text("Cemilan"),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCategory =
+                                              "Makanan"; // Set kategori ke "Makanan"
+                                          _currentIndex =
+                                              1; // Tampilkan halaman kedua kategori "Makanan" (Makanan Berat)
+                                        });
+                                      },
+                                      child: ListTile(
+                                        title: Text("Makanan Berat"),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _currentIndex = 1;
-                                  });
-                                },
-                                child: ListTile(
-                                  title: Text("Coffee"),
+                              // Kategori Minuman
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: size.width * 0.01),
+                                    child: Image.asset(
+                                        "assets/images/coffee-cup 2.png"),
+                                  ),
+                                  Text(
+                                    "Minuman",
+                                    style: TextStyle(
+                                      color: Color(0xff0C085C),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Expanded(
+                                child: ListView(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCategory =
+                                              "Minuman"; // Set kategori ke "Minuman"
+                                          _currentIndex =
+                                              0; // Tampilkan halaman pertama kategori "Minuman"
+                                        });
+                                      },
+                                      child: ListTile(
+                                        title: Text("Coffee"),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        // Menu display area (IndexedStack)
+                        // Tampilan Konten Berdasarkan Kategori
                         Expanded(
                           flex: 6,
                           child: IndexedStack(
-                            index: _currentIndex,
+                            index:
+                                _currentIndex, // Index berubah sesuai dengan halaman yang dipilih
                             children: [
-                              Cemilan(
-                                size: size,
-                                onProductSelected: onProductSelected,
-                              ),
-                              Coffe(
-                                size: size,
-                                onProductSelected: onProductSelected,
-                              ),
+                              if (_selectedCategory == "Makanan") ...[
+                                Cemilan(
+                                  size: size,
+                                  onProductSelected: onProductSelected,
+                                ),
+                                MakananBerat(
+                                  size: size,
+                                  onProductSelected: onProductSelected,
+                                ),
+                              ],
+                              if (_selectedCategory == "Minuman") ...[
+                                Coffe(
+                                  size: size,
+                                  onProductSelected: onProductSelected,
+                                ),
+                              ],
                             ],
                           ),
                         ),
