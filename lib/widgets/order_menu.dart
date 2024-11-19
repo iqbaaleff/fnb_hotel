@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fnb_hotel/logoutFunction/logoutFunction.dart';
 
-class OrderMenu extends StatelessWidget {
+class OrderMenu extends StatefulWidget {
   final Size size;
   final List<dynamic> selectedProducts;
   final Function kurang;
@@ -19,10 +20,15 @@ class OrderMenu extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<OrderMenu> createState() => _OrderMenuState();
+}
+
+class _OrderMenuState extends State<OrderMenu> {
+  @override
   Widget build(BuildContext context) {
     return Container(
-      width: size.width * 0.28,
-      height: size.height,
+      width: widget.size.width * 0.38,
+      height: widget.size.height,
       decoration: BoxDecoration(
         border: Border(
           left: BorderSide(
@@ -32,7 +38,7 @@ class OrderMenu extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.only(left: size.width * 0.01),
+        padding: EdgeInsets.only(left: widget.size.width * 0.01),
         child: Column(
           children: [
             // Bar Atas
@@ -41,8 +47,8 @@ class OrderMenu extends StatelessWidget {
               child: Row(
                 children: [
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: size.width * 0.01),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: widget.size.width * 0.01),
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
@@ -50,8 +56,8 @@ class OrderMenu extends StatelessWidget {
                       ),
                       child: Image.asset(
                         "assets/images/clipboard.png",
-                        height: size.height * 0.047,
-                        width: size.width * 0.027,
+                        height: widget.size.height * 0.047,
+                        width: widget.size.width * 0.027,
                       ),
                     ),
                   ),
@@ -66,7 +72,10 @@ class OrderMenu extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // Panggil fungsi logout
+                      logout(context);
+                    },
                     icon: Icon(Icons.more_vert),
                   ),
                 ],
@@ -79,15 +88,16 @@ class OrderMenu extends StatelessWidget {
             // Cart
             Expanded(
               flex: 7,
-              child: selectedProducts.isNotEmpty
+              child: widget.selectedProducts.isNotEmpty
                   ? ListView.builder(
                       padding: EdgeInsets.all(10),
-                      itemCount: selectedProducts.length,
+                      itemCount: widget.selectedProducts.length,
                       itemBuilder: (context, index) {
-                        final products = selectedProducts[index];
+                        final products = widget.selectedProducts[index];
 
                         return Padding(
-                          padding: EdgeInsets.only(bottom: size.height * 0.015),
+                          padding: EdgeInsets.only(
+                              bottom: widget.size.height * 0.015),
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
@@ -106,8 +116,8 @@ class OrderMenu extends StatelessWidget {
                                       bottomLeft: Radius.circular(15),
                                     ),
                                     child: Container(
-                                      height: size.height * 0.11,
-                                      width: size.width * 0.01,
+                                      height: widget.size.height * 0.11,
+                                      width: widget.size.width * 0.01,
                                       color: Color(0xffE22323),
                                     ),
                                   ),
@@ -117,19 +127,26 @@ class OrderMenu extends StatelessWidget {
                                   child: Container(
                                     child: Row(
                                       children: [
-                                        products.fotoProduk != null &&
-                                                products.fotoProduk!.isNotEmpty
-                                            ? Image.network(
-                                                'https://xrzwvx14-5000.asse.devtunnels.ms${products.fotoProduk!}',
-                                                fit: BoxFit.contain,
-                                                width: size.width * 0.05,
-                                                height: size.height * 0.11,
-                                              )
-                                            : Icon(
-                                                Icons.image_not_supported,
-                                                size: 100,
-                                                color: Colors.grey[400],
-                                              ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: widget.size.width * 0.01),
+                                          child: products.fotoProduk != null &&
+                                                  products
+                                                      .fotoProduk!.isNotEmpty
+                                              ? Image.network(
+                                                  'https://xrzwvx14-5000.asse.devtunnels.ms${products.fotoProduk!}',
+                                                  fit: BoxFit.contain,
+                                                  width:
+                                                      widget.size.width * 0.05,
+                                                  height:
+                                                      widget.size.height * 0.11,
+                                                )
+                                              : Icon(
+                                                  Icons.image_not_supported,
+                                                  size: 100,
+                                                  color: Colors.grey[400],
+                                                ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -174,7 +191,7 @@ class OrderMenu extends StatelessWidget {
                                         // -
                                         IconButton(
                                           onPressed: () {
-                                            kurang(products);
+                                            widget.kurang(products);
                                           },
                                           icon: Icon(
                                             Icons.remove_circle,
@@ -186,11 +203,24 @@ class OrderMenu extends StatelessWidget {
                                         // +
                                         IconButton(
                                           onPressed: () {
-                                            tambah(products);
+                                            widget.tambah(products);
                                           },
                                           icon: Icon(
                                             Icons.add_circle,
                                             color: Color(0xffE22323),
+                                          ),
+                                        ),
+                                        // Tombol hapus
+                                        IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              widget.selectedProducts
+                                                  .removeAt(index);
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
                                           ),
                                         ),
                                       ],
@@ -216,19 +246,19 @@ class OrderMenu extends StatelessWidget {
               flex: 2,
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  vertical: size.height * 0.04,
-                  horizontal: size.width * 0.01,
+                  vertical: widget.size.height * 0.04,
+                  horizontal: widget.size.width * 0.05,
                 ),
                 child: Container(
-                  width: size.width,
-                  height: size.height,
+                  width: widget.size.width,
+                  height: widget.size.height,
                   decoration: BoxDecoration(
                     color: Color(0xffE22323),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: size.width * 0.01),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: widget.size.width * 0.01),
                     child: Row(
                       children: [
                         // pcs + total harga
@@ -238,7 +268,7 @@ class OrderMenu extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${selectedProducts.length} Items",
+                                "${widget.selectedProducts.length} Items",
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
@@ -246,7 +276,7 @@ class OrderMenu extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                "Rp ${totalHarga().toString()}",
+                                "Rp ${widget.totalHarga().toString()}",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
@@ -259,7 +289,7 @@ class OrderMenu extends StatelessWidget {
                         //button
                         ElevatedButton(
                           onPressed: () {
-                            popupKonfirBayar(context);
+                            widget.popupKonfirBayar(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,

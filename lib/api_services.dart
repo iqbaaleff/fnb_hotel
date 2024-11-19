@@ -22,6 +22,7 @@ class ApiService {
       throw Exception('Failed to load products: $e');
     }
   }
+
   //API Coffe
   Future<List<Product>> getProductsCoffe() async {
     const String url =

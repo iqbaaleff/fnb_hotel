@@ -40,7 +40,7 @@ class _SidebarAdminState extends State<SidebarAdmin> {
       AddProduct(),
       Riwayat(),
       Akun(),
-      LogoutPage(),
+      LogoutAdmin(),
     ];
   }
 
