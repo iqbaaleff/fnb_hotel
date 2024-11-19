@@ -17,7 +17,7 @@ class _LoginState extends State<Login> {
   final TextEditingController passwordController = TextEditingController();
   final Dio _dio = Dio();
   bool _isLoading = false;
-  bool _secureText = false;
+  bool _secureText = true;
 
   void _login() async {
     setState(() {

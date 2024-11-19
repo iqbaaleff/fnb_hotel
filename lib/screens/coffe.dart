@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/api_services.dart';
 import 'package:fnb_hotel/models/produk.dart';
 
 class Coffe extends StatefulWidget {
   final Size size;
-
   final Function(Product) onProductSelected;
 
   Coffe({
@@ -26,6 +26,22 @@ class _CoffeState extends State<Coffe> {
     _product = ApiService().getProductsCoffe();
   }
 
+  /// Fungsi untuk memeriksa apakah token tersimpan
+  Future<void> _checkToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Token tersimpan: $token')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Token tidak ditemukan')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -42,100 +58,117 @@ class _CoffeState extends State<Coffe> {
             ),
           ),
         ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
-          child: FutureBuilder<List<Product>>(
-            future: _product,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text('No products available'));
-              }
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
+                child: FutureBuilder<List<Product>>(
+                  future: _product,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(child: Text('No products available'));
+                    }
 
-              final products = snapshot.data;
+                    final products = snapshot.data;
 
-              return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 5,
-                  crossAxisCount: 4,
-                  childAspectRatio: 0.95,
-                ),
-                itemCount: products!.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return GestureDetector(
-                    onTap: () => widget.onProductSelected(product),
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 2,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: product.fotoProduk != null &&
-                                      product.fotoProduk!.isNotEmpty
-                                  ? Image.network(
-                                      'https://74gslzvj-3000.asse.devtunnels.ms${product.fotoProduk!}',
-                                      fit: BoxFit.fill,
-                                      width: double.infinity,
-                                    )
-                                  : Container(
-                                      color: Colors.grey[200],
-                                      child: Icon(Icons.image_not_supported),
-                                    ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: widget.size.width * 0.007,
-                              right: widget.size.width * 0.007,
-                              bottom: widget.size.height * 0.02,
-                            ),
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 5,
+                        crossAxisCount: 4,
+                        childAspectRatio: 0.95,
+                      ),
+                      itemCount: products!.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return GestureDetector(
+                          onTap: () => widget.onProductSelected(product),
+                          child: Card(
+                            color: Colors.white,
+                            elevation: 2,
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    top: widget.size.height * 0.005,
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: widget.size.height * 0.005,
-                                    ),
-                                    child: Text(
-                                      product.judulProduk,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xff0C085C),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: product.fotoProduk != null &&
+                                            product.fotoProduk!.isNotEmpty
+                                        ? Image.network(
+                                            'https://74gslzvj-3000.asse.devtunnels.ms${product.fotoProduk!}',
+                                            fit: BoxFit.fill,
+                                            width: double.infinity,
+                                          )
+                                        : Container(
+                                            color: Colors.grey[200],
+                                            child:
+                                                Icon(Icons.image_not_supported),
+                                          ),
                                   ),
                                 ),
-                                Text(
-                                  "Rp. ${product.harga.toString()}",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: widget.size.width * 0.007,
+                                    right: widget.size.width * 0.007,
+                                    bottom: widget.size.height * 0.02,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          top: widget.size.height * 0.005,
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical:
+                                                widget.size.height * 0.005,
+                                          ),
+                                          child: Text(
+                                            product.judulProduk,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Color(0xff0C085C),
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        "Rp. ${product.harga.toString()}",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: ElevatedButton(
+                onPressed: _checkToken,
+                child: Text('Cek Token'),
+              ),
+            ),
+          ],
         ),
       ),
     );
