@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/api_services.dart';
 import 'package:fnb_hotel/models/produk.dart';
 
 class Cemilan extends StatefulWidget {
   final Size size;
-
   final Function(Product) onProductSelected;
 
-  Cemilan({
+  const Cemilan({
     Key? key,
     required this.size,
     required this.onProductSelected,
@@ -18,12 +18,40 @@ class Cemilan extends StatefulWidget {
 }
 
 class _CemilanState extends State<Cemilan> {
-  late Future<List<Product>> _product;
+  Future<List<Product>>? _product;
+  String? _token;
 
   @override
   void initState() {
     super.initState();
-    _product = ApiService().getProductsCemilan();
+    _loadToken(); // Ambil token saat widget diinisialisasi
+  }
+
+  Future<void> _loadToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token != null) {
+        setState(() {
+          _token = token;
+          _product = ApiService().getProductsCemilan();
+        });
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Token tidak ditemukan, silakan login ulang')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan saat mengambil token: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -34,8 +62,8 @@ class _CemilanState extends State<Cemilan> {
         width: widget.size.width,
         height: widget.size.height,
         decoration: BoxDecoration(
-          color: Color(0xffF4F4F4),
-          border: Border(
+          color: const Color(0xffF4F4F4),
+          border: const Border(
             left: BorderSide(
               color: Color(0xff8B8B8B),
               width: 1,
@@ -48,17 +76,17 @@ class _CemilanState extends State<Cemilan> {
             future: _product,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text('No products available'));
+                return const Center(child: Text('No products available'));
               }
 
               final products = snapshot.data;
 
               return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 5,
                   crossAxisCount: 4,
@@ -86,7 +114,8 @@ class _CemilanState extends State<Cemilan> {
                                     )
                                   : Container(
                                       color: Colors.grey[200],
-                                      child: Icon(Icons.image_not_supported),
+                                      child:
+                                          const Icon(Icons.image_not_supported),
                                     ),
                             ),
                           ),
@@ -110,7 +139,7 @@ class _CemilanState extends State<Cemilan> {
                                     child: Text(
                                       product.judulProduk,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Color(0xff0C085C),
                                         fontSize: 15,
                                         fontWeight: FontWeight.w700,

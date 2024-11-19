@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:fnb_hotel/admin/sidebarScreen/ProductList.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddProduct extends StatefulWidget {
   @override
@@ -26,9 +28,24 @@ class _AddProductState extends State<AddProduct> {
   final String apiUrl =
       'https://74gslzvj-3000.asse.devtunnels.ms/api/produk'; // Ganti dengan URL Express Anda
 
+  // Fungsi untuk mengambil token dari SharedPreferences
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
   // Fungsi untuk mengunggah data ke API
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      final token = await _getToken();
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Token tidak ditemukan. Silakan login kembali.')),
+        );
+        return;
+      }
+
       final formData = FormData.fromMap({
         'judul_produk': _judulController.text,
         'harga': int.parse(_hargaController.text),
@@ -40,7 +57,16 @@ class _AddProductState extends State<AddProduct> {
       });
 
       try {
-        final response = await _dio.post(apiUrl, data: formData);
+        final response = await _dio.post(
+          apiUrl,
+          data: formData,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $token', // Menambahkan token ke header
+            },
+          ),
+        );
+
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Produk berhasil ditambahkan!')),
@@ -201,6 +227,16 @@ class _AddProductState extends State<AddProduct> {
                     onPressed: _submitForm,
                     child: Text('Simpan Produk'),
                   ),
+                ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProductList()),
+                    );
+                  },
+                  child: Text('Lihat Daftar Produk'),
                 ),
               ],
             ),
