@@ -6,11 +6,13 @@ import 'package:fnb_hotel/models/produk.dart';
 class Coffe extends StatefulWidget {
   final Size size;
   final Function(Product) onProductSelected;
+  final Function(double) formatAngka;
 
   Coffe({
     Key? key,
     required this.size,
     required this.onProductSelected,
+    required this.formatAngka,
   }) : super(key: key);
 
   @override
@@ -50,35 +52,35 @@ class _CoffeState extends State<Coffe> {
         width: widget.size.width,
         height: widget.size.height,
         decoration: BoxDecoration(
-          color: Color(0xffF4F4F4),
-          border: Border(
+          color: const Color(0xffF4F4F4),
+          border: const Border(
             left: BorderSide(
               color: Color(0xff8B8B8B),
               width: 1,
             ),
           ),
         ),
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
+          child: Column(
+            children: [
+              Expanded(
                 child: FutureBuilder<List<Product>>(
                   future: _product,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('No products available'));
+                      return const Center(child: Text('No products available'));
                     }
 
                     final products = snapshot.data;
 
                     return GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 5,
                         crossAxisCount: 4,
@@ -106,8 +108,8 @@ class _CoffeState extends State<Coffe> {
                                           )
                                         : Container(
                                             color: Colors.grey[200],
-                                            child:
-                                                Icon(Icons.image_not_supported),
+                                            child: const Icon(
+                                                Icons.image_not_supported),
                                           ),
                                   ),
                                 ),
@@ -133,7 +135,7 @@ class _CoffeState extends State<Coffe> {
                                           child: Text(
                                             product.judulProduk,
                                             textAlign: TextAlign.center,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Color(0xff0C085C),
                                               fontSize: 15,
                                               fontWeight: FontWeight.w700,
@@ -142,7 +144,7 @@ class _CoffeState extends State<Coffe> {
                                         ),
                                       ),
                                       Text(
-                                        "Rp. ${product.harga.toString()}",
+                                        "Rp. ${product.harga != null ? widget.formatAngka(product.harga!.toDouble()) : 'Tidak ada harga'}",
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey.shade600,
@@ -160,15 +162,8 @@ class _CoffeState extends State<Coffe> {
                   },
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: ElevatedButton(
-                onPressed: _checkToken,
-                child: Text('Cek Token'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

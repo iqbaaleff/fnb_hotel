@@ -6,11 +6,14 @@ import 'package:fnb_hotel/models/produk.dart';
 class Cemilan extends StatefulWidget {
   final Size size;
   final Function(Product) onProductSelected;
+  final Function(double) formatAngka;
+  
 
   const Cemilan({
     Key? key,
     required this.size,
     required this.onProductSelected,
+     required this.formatAngka,
   }) : super(key: key);
 
   @override
@@ -54,6 +57,8 @@ class _CemilanState extends State<Cemilan> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -72,98 +77,108 @@ class _CemilanState extends State<Cemilan> {
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
-          child: FutureBuilder<List<Product>>(
-            future: _product,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('No products available'));
-              }
+          child: Column(
+            children: [
+              
+              Expanded(
+                child: FutureBuilder<List<Product>>(
+                  future: _product,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No products available'));
+                    }
 
-              final products = snapshot.data;
+                    final products = snapshot.data;
 
-              return GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 5,
-                  crossAxisCount: 4,
-                  childAspectRatio: 0.95,
-                ),
-                itemCount: products!.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return GestureDetector(
-                    onTap: () => widget.onProductSelected(product),
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 2,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: product.fotoProduk != null &&
-                                      product.fotoProduk!.isNotEmpty
-                                  ? Image.network(
-                                      'https://74gslzvj-3000.asse.devtunnels.ms${product.fotoProduk!}',
-                                      fit: BoxFit.fill,
-                                      width: double.infinity,
-                                    )
-                                  : Container(
-                                      color: Colors.grey[200],
-                                      child:
-                                          const Icon(Icons.image_not_supported),
-                                    ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: widget.size.width * 0.007,
-                              right: widget.size.width * 0.007,
-                              bottom: widget.size.height * 0.02,
-                            ),
+                    return GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 5,
+                        crossAxisCount: 4,
+                        childAspectRatio: 0.95,
+                      ),
+                      itemCount: products!.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return GestureDetector(
+                          onTap: () => widget.onProductSelected(product),
+                          child: Card(
+                            color: Colors.white,
+                            elevation: 2,
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    top: widget.size.height * 0.005,
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: widget.size.height * 0.005,
-                                    ),
-                                    child: Text(
-                                      product.judulProduk,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: Color(0xff0C085C),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: product.fotoProduk != null &&
+                                            product.fotoProduk!.isNotEmpty
+                                        ? Image.network(
+                                            'https://74gslzvj-3000.asse.devtunnels.ms${product.fotoProduk!}',
+                                            fit: BoxFit.fill,
+                                            width: double.infinity,
+                                          )
+                                        : Container(
+                                            color: Colors.grey[200],
+                                            child: const Icon(
+                                                Icons.image_not_supported),
+                                          ),
                                   ),
                                 ),
-                                Text(
-                                  "Rp. ${product.harga.toString()}",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: widget.size.width * 0.007,
+                                    right: widget.size.width * 0.007,
+                                    bottom: widget.size.height * 0.02,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          top: widget.size.height * 0.005,
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical:
+                                                widget.size.height * 0.005,
+                                          ),
+                                          child: Text(
+                                            product.judulProduk,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: Color(0xff0C085C),
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        "Rp. ${product.harga != null ? widget.formatAngka(product.harga!.toDouble()) : 'Tidak ada harga'}",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

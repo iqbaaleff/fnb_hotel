@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:fnb_hotel/api_services.dart';
 
 import 'package:fnb_hotel/models/produk.dart';
-import 'package:fnb_hotel/screens/berat.dart';
+
 import 'package:fnb_hotel/screens/cemilan.dart';
 import 'package:fnb_hotel/screens/coffe.dart';
 import 'package:fnb_hotel/screens/order_menu.dart';
+import 'package:intl/intl.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -16,15 +17,23 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   String _selectedCategory = "";
+  String _selectedCategoryIndex = "";
   int _currentIndex = 0;
-  int? _currentIndexMakanan;
-  int? _currentIndexMinuman;
   List<Product> selectedProducts = [];
 
+  bool isFocused = false;
+
   Map<String, List<String>> kategori = {
-    "makanan": ["Cemilan", "Mie Ayam", "Rendang", "Sate", "Bakso"],
-    "minuman": ["Teh Manis", "Kopi", "Jus Jeruk", "Air Mineral", "Es Teh"]
+    "makanan": ["Cemilan", "Lutpan"],
+    "minuman": ["Coffe", "AAAW"]
   };
+
+  // Rupiah
+  String formatAngka(double angka) {
+    final formatter = NumberFormat(
+        '#,##0', 'id_ID'); // Menggunakan locale Indonesia dengan format titik
+    return formatter.format(angka); // Hasilnya akan seperti 1.000.000
+  }
 
   final ApiService apiService = ApiService();
 
@@ -564,6 +573,27 @@ class _HomepageState extends State<Homepage> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        // Search Bar
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: size.width * 0.02),
+                            child: TextField(
+                              onChanged: (value) {
+                                // Logic for searching
+                              },
+                              decoration: InputDecoration(
+                                hintText: "Search...",
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -605,32 +635,34 @@ class _HomepageState extends State<Homepage> {
                                   itemCount: makanan.length,
                                   itemBuilder: (context, index) {
                                     final item = makanan[index];
-                                    final isSelected =
-                                        _currentIndexMakanan == index;
 
-                                    return Container(
-                                      color: isSelected
-                                          ? Color(0xffE22323)
-                                          : Colors
-                                              .transparent, // Abu-abu jika dipilih
-                                      child: ListTile(
-                                        title: Text(
-                                          item,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? Colors.white
-                                                : Colors.black,
-                                          ),
+                                    return ListTile(
+                                      title: Text(
+                                        item,
+                                        style: TextStyle(
+                                          color: _selectedCategory ==
+                                                  makanan[index]
+                                              ? Colors.white
+                                              : null,
                                         ),
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedCategory = "Makanan";
-                                            _currentIndexMakanan = index;
-                                            _currentIndexMinuman == null;
-                                            _currentIndex = index;
-                                          });
-                                        },
                                       ),
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCategory = makanan[index];
+                                          _selectedCategoryIndex = "Makanan";
+
+                                          _currentIndex = index;
+                                        });
+                                      },
+                                      tileColor: _selectedCategory ==
+                                              makanan[index]
+                                          ? Color(0xffE22323)
+                                          : null, // Ganti warna jika kategori dipilih
+                                      selectedTileColor: Color(
+                                          0xffE22323), // Warna saat item aktif
+                                      selected: _selectedCategory ==
+                                          makanan[
+                                              index], // Menandai jika kategori ini dipilih
                                     );
                                   },
                                 ),
@@ -659,32 +691,34 @@ class _HomepageState extends State<Homepage> {
                                   itemCount: minuman.length,
                                   itemBuilder: (context, index) {
                                     final item = minuman[index];
-                                    final isSelected =
-                                        _currentIndexMinuman == index;
 
-                                    return Container(
-                                      color: isSelected
-                                          ? Color(0xffE22323)
-                                          : Colors
-                                              .transparent, // Abu-abu jika dipilih
-                                      child: ListTile(
-                                        title: Text(
-                                          item,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? Colors.white
-                                                : Colors.black,
-                                          ),
+                                    return ListTile(
+                                      title: Text(
+                                        item,
+                                        style: TextStyle(
+                                          color: _selectedCategory ==
+                                                  minuman[index]
+                                              ? Colors.white
+                                              : null,
                                         ),
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedCategory = "Minuman";
-                                            _currentIndexMinuman = index;
-                                            _currentIndexMakanan == null;
-                                            _currentIndex = index;
-                                          });
-                                        },
                                       ),
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCategory = minuman[index];
+                                          _selectedCategoryIndex = "Minuman";
+
+                                          _currentIndex = index;
+                                        });
+                                      },
+                                      tileColor: _selectedCategory ==
+                                              minuman[index]
+                                          ? Color(0xffE22323)
+                                          : null, // Ganti warna jika kategori dipilih
+                                      selectedTileColor: Color(
+                                          0xffE22323), // Warna saat item aktif
+                                      selected: _selectedCategory ==
+                                          minuman[
+                                              index], // Menandai jika kategori ini dipilih
                                     );
                                   },
                                 ),
@@ -699,18 +733,16 @@ class _HomepageState extends State<Homepage> {
                             index:
                                 _currentIndex, // Index berubah sesuai dengan halaman yang dipilih
                             children: [
-                              if (_selectedCategory == "Makanan") ...[
+                              if (_selectedCategoryIndex == "Makanan") ...[
                                 Cemilan(
-                                  size: size,
-                                  onProductSelected: onProductSelected,
-                                ),
-                                MakananBerat(
+                                  formatAngka: formatAngka,
                                   size: size,
                                   onProductSelected: onProductSelected,
                                 ),
                               ],
-                              if (_selectedCategory == "Minuman") ...[
+                              if (_selectedCategoryIndex == "Minuman") ...[
                                 Coffe(
+                                  formatAngka: formatAngka,
                                   size: size,
                                   onProductSelected: onProductSelected,
                                 ),
@@ -727,6 +759,7 @@ class _HomepageState extends State<Homepage> {
 
             // Order Menu
             OrderMenu(
+              formatAngka: formatAngka,
               selectedProducts: selectedProducts,
               size: size,
               totalHarga: totalHarga,

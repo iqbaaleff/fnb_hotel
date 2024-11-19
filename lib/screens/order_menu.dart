@@ -8,6 +8,7 @@ class OrderMenu extends StatefulWidget {
   final Function tambah;
   final Function totalHarga;
   final Function(BuildContext) popupKonfirBayar;
+  final Function(double) formatAngka;
 
   const OrderMenu({
     Key? key,
@@ -17,6 +18,7 @@ class OrderMenu extends StatefulWidget {
     required this.tambah,
     required this.totalHarga,
     required this.popupKonfirBayar,
+    required this.formatAngka,
   }) : super(key: key);
 
   @override
@@ -71,12 +73,31 @@ class _OrderMenuState extends State<OrderMenu> {
                       ),
                     ),
                   ),
-                  IconButton(
+                  ElevatedButton(
                     onPressed: () {
                       // Panggil fungsi logout
                       logout(context);
                     },
-                    icon: Icon(Icons.more_vert),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xffE22323),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.logout_rounded,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          "Logout",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -171,7 +192,7 @@ class _OrderMenuState extends State<OrderMenu> {
                                         Row(
                                           children: [
                                             Text(
-                                              "Rp. ${products.harga.toString()}",
+                                              "Rp. ${products.harga != null ? widget.formatAngka(products.harga!.toDouble()) : 'Tidak ada harga'}",
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: Colors.grey.shade600,
@@ -276,7 +297,7 @@ class _OrderMenuState extends State<OrderMenu> {
                                 ),
                               ),
                               Text(
-                                "Rp ${widget.totalHarga().toString()}",
+                                "Rp. ${widget.totalHarga() != null ? widget.formatAngka(widget.totalHarga().toDouble()) : 'Tidak ada harga'}",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
