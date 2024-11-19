@@ -80,7 +80,7 @@ class _CemilanState extends State<Cemilan> {
                               child: product.fotoProduk != null &&
                                       product.fotoProduk!.isNotEmpty
                                   ? Image.network(
-                                      'https://xrzwvx14-5000.asse.devtunnels.ms${product.fotoProduk!}',
+                                      'https://74gslzvj-3000.asse.devtunnels.ms${product.fotoProduk!}',
                                       fit: BoxFit.fill,
                                       width: double.infinity,
                                     )
