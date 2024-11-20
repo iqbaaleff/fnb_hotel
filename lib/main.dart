@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fnb_hotel/screens/homepage.dart';
+import 'package:fnb_hotel/screens/kasir/homepage.dart';
 import 'package:fnb_hotel/screens/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'admin/sidebar.dart';
+import 'screens/admin/sidebar.dart';
 
 void main() {
   runApp(const MyApp());

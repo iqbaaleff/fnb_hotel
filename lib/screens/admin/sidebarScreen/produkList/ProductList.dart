@@ -154,7 +154,12 @@ class _ProductListState extends State<ProductList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daftar Produk'),
+        title: const Text(
+          'Daftar Produk',
+          style: TextStyle(
+            color: Color(0xFF22E284),
+          ),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

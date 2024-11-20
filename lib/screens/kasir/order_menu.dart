@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fnb_hotel/logoutFunction/logoutFunction.dart';
+import 'package:fnb_hotel/services/logoutFunction.dart';
 
 class OrderMenu extends StatefulWidget {
   final Size size;
@@ -310,7 +310,19 @@ class _OrderMenuState extends State<OrderMenu> {
                         //button
                         ElevatedButton(
                           onPressed: () {
-                            widget.popupKonfirBayar(context);
+                            if (widget.selectedProducts.isNotEmpty) {
+                              widget.popupKonfirBayar(context);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text("Tidak ada produk yang dipilih."),
+                                  duration: Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: Color(0xffE22323),
+                                ),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,

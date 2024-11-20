@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fnb_hotel/models/produk.dart';
-import 'package:fnb_hotel/screens/cemilan.dart';
-import 'package:fnb_hotel/screens/coffe.dart';
-import 'package:fnb_hotel/screens/order_menu.dart';
+import 'package:fnb_hotel/screens/kasir/cemilan.dart';
+import 'package:fnb_hotel/screens/kasir/coffe.dart';
+import 'package:fnb_hotel/screens/kasir/order_menu.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -839,17 +839,7 @@ class _HomepageState extends State<Homepage> {
                             index:
                                 _currentIndex, // Index berubah sesuai dengan halaman yang dipilih
                             children: [
-                              if (_selectedCategoryIndex == "") ...[
-                                Center(
-                                    child: Text(
-                                  "Welcome !",
-                                  style: TextStyle(
-                                    fontSize: 50,
-                                    color: Color(0xff0C085C),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )),
-                              ],
+                              
                               if (_selectedCategoryIndex == "Makanan") ...[
                                 Cemilan(
                                   formatAngka: formatAngka,

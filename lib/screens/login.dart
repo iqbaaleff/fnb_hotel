@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fnb_hotel/screens/homepage.dart';
-import 'package:fnb_hotel/admin/sidebar.dart';
+import 'package:fnb_hotel/screens/kasir/homepage.dart';
+import 'package:fnb_hotel/screens/admin/sidebar.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});

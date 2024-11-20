@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:fnb_hotel/admin/sidebarScreen/produkList/ProductList.dart';
-import 'package:fnb_hotel/logoutFunction/logoutFunction.dart';
+import 'package:fnb_hotel/screens/admin/sidebarScreen/produkList/ProductList.dart';
+import 'package:fnb_hotel/services/logoutFunction.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -130,7 +130,10 @@ class _AddProductState extends State<AddProduct> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Produk'),
+        title: const Text('Tambah Produk',
+            style: TextStyle(
+              color: Color(0xFF22E284),
+            )),
         backgroundColor: Colors.white,
         actions: [
           ElevatedButton(
@@ -166,7 +169,7 @@ class _AddProductState extends State<AddProduct> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0), // Ketebalan garis
           child: Container(
-            color: Colors.black, // Warna garis
+            color: Color(0xFF22E284), // Warna garis
             height: 2.0, // Tinggi garis (ketebalan)
           ),
         ),
@@ -180,12 +183,61 @@ class _AddProductState extends State<AddProduct> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProductList()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF22E284),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'Lihat Daftar Produk',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 // Judul Produk
                 TextFormField(
                   controller: _judulController,
                   decoration: InputDecoration(
                     labelText: 'Judul Produk',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xFF22E284),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -202,7 +254,27 @@ class _AddProductState extends State<AddProduct> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Harga',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xFF22E284),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -221,7 +293,32 @@ class _AddProductState extends State<AddProduct> {
                   value: _kategoriProduk,
                   decoration: InputDecoration(
                     labelText: 'Kategori Produk',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xFF22E284),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                  ),
+                  dropdownColor: Colors.white, // Warna latar dropdown
+                  style: TextStyle(
+                    color: Color(0xFF22E284), // Warna teks dalam dropdown
+                    fontWeight: FontWeight.bold,
                   ),
                   items: ['makanan', 'minuman']
                       .map(
@@ -244,7 +341,27 @@ class _AddProductState extends State<AddProduct> {
                   controller: _subKategoriController,
                   decoration: InputDecoration(
                     labelText: 'Sub Kategori Produk',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xFF22E284),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xFF22E284), width: 3),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -258,8 +375,18 @@ class _AddProductState extends State<AddProduct> {
                 // Foto Produk
                 ElevatedButton(
                   onPressed: _pickImage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF22E284),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                   child: Text(
-                      _fotoProduk == null ? 'Pilih Foto' : 'Ganti Foto Produk'),
+                    _fotoProduk == null ? 'Pilih Foto' : 'Ganti Foto Produk',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
                 if (_fotoProduk != null) ...[
                   Padding(
@@ -282,22 +409,25 @@ class _AddProductState extends State<AddProduct> {
                 const SizedBox(height: 16),
 
                 // Tombol Submit
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _submitForm,
-                    child: Text('Simpan Produk'),
-                  ),
-                ),
-
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProductList()),
-                    );
-                  },
-                  child: Text('Lihat Daftar Produk'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF22E284),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: _submitForm,
+                      child: Text(
+                        'Simpan Produk',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

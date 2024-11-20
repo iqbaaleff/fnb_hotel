@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fnb_hotel/admin/sidebarScreen/addProduct.dart';
-import 'package:fnb_hotel/admin/sidebarScreen/akun.dart';
-import 'package:fnb_hotel/admin/sidebarScreen/riwayat.dart';
+import 'package:fnb_hotel/screens/admin/sidebarScreen/addProduct.dart';
+import 'package:fnb_hotel/screens/admin/sidebarScreen/akun.dart';
+import 'package:fnb_hotel/screens/admin/sidebarScreen/riwayat.dart';
 
 class SidebarAdmin extends StatefulWidget {
   final bool isAdmin;
