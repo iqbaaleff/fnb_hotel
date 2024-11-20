@@ -1,14 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:fnb_hotel/api_services.dart';
-
 import 'package:fnb_hotel/models/produk.dart';
-
 import 'package:fnb_hotel/screens/cemilan.dart';
 import 'package:fnb_hotel/screens/coffe.dart';
 import 'package:fnb_hotel/screens/order_menu.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+Dio _dio = Dio();
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -18,8 +17,8 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  String _selectedCategory = "";
-  String _selectedCategoryIndex = "";
+  String _selectedCategory = "Cemilan";
+  String _selectedCategoryIndex = "Makanan";
   int _currentIndex = 0;
   List<Product> selectedProducts = [];
   String kasirName = '';
@@ -35,21 +34,21 @@ class _HomepageState extends State<Homepage> {
     "minuman": ["Coffe", "Soon"]
   };
 
-  // Rupiah
+// Rupiah
   String formatAngka(double angka) {
     final formatter = NumberFormat(
         '#,##0', 'id_ID'); // Menggunakan locale Indonesia dengan format titik
     return formatter.format(angka); // Hasilnya akan seperti 1.000.000
   }
 
-  // Fungsi untuk menghitung total harga
+// Fungsi untuk menghitung total harga
   double totalHarga() {
     return selectedProducts.fold(0, (sum, product) {
       return sum + (product.harga! * product.quantity);
     });
   }
 
-  // Fungsi untuk menghitung subtotal harga dengan biaya layanan
+// Fungsi untuk menghitung subtotal harga dengan biaya layanan
   double subTotalHarga() {
     double totalHarga = selectedProducts.fold(0, (sum, product) {
       return sum + (product.harga! * product.quantity);
@@ -57,114 +56,100 @@ class _HomepageState extends State<Homepage> {
     return totalHarga + biayaLayanan;
   }
 
-  // Fungsi untuk mengambil token dan username dari SharedPreferences
-  Future<void> getUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    kasirName = prefs.getString('username') ?? ''; // Ambil username
+  @override
+  void initState() {
+    super.initState();
+    getUserData(); // Ambil data username saat halaman dimuat
   }
 
-  // Fungsi untuk mendapatkan token dari SharedPreferences
+// Fungsi untuk mengambil token dan username dari SharedPreferences
+  Future<void> getUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    kasirName = prefs.getString('username') ?? '';
+    print(
+        "KasirName from SharedPreferences: $kasirName"); // Tambahkan print debug
+    setState(() {}); // Perbarui UI setelah mendapatkan kasirName
+  }
+
+// Fungsi untuk mendapatkan token dari SharedPreferences
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
 
-  // Fungsi untuk mengirimkan transaksi ke backend
+// Fungsi untuk mengirim transaksi ke backend
   Future<void> kirimTransaksi() async {
-    await getUserData(); // Mengambil data username kasir
-
-    final token = await getToken(); // Mendapatkan token dari SharedPreferences
-    if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Token tidak ditemukan. Silakan login kembali.')),
-      );
-      return;
-    }
-
-    // Pastikan nominalBayar diambil dengan benar
-    double nominalBayar = double.tryParse(nominalController.text) ?? 0;
-    if (nominalBayar <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Nominal bayar tidak valid.')),
-      );
-      return;
-    }
-
-    // Cek apakah nominal bayar cukup untuk transaksi
-    if (nominalBayar < subTotalHarga()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Nominal bayar kurang dari subtotal.')),
-      );
-      return;
-    }
-
-    double kembalian = nominalBayar - subTotalHarga(); // Menghitung kembalian
-
-    // Menambahkan log untuk memastikan data yang dikirim benar
-    print('Data yang dikirim:');
-    print('kasirName: $kasirName');
-    print('atasNama: ${aNamaController.text}');
-    print('totalHarga: ${totalHarga()}');
-    print('biayaLayanan: $biayaLayanan');
-    print('subTotalHarga: ${subTotalHarga()}');
-    print('nominalBayar: $nominalBayar');
-    print('kembalian: $kembalian');
-
     try {
-      var dio = Dio();
-      var response = await dio.post(
-        'https://74gslzvj-3000.asse.devtunnels.ms/api/order', // URL backend Anda
+      // Pastikan getUserData() dipanggil sebelum kirimTransaksi
+      await getUserData();
+      print(
+          "Kasir Name after getUserData: $kasirName"); // Log untuk melihat nilai kasirName
+
+      // Cek apakah data kasir atau atas nama sudah diisi
+      if (kasirName.isEmpty || aNamaController.text.isEmpty) {
+        print("KasirName: $kasirName, AtasNama: ${aNamaController.text}");
+        throw Exception("Data kasir atau atas nama tidak lengkap!");
+      }
+
+      // Pastikan ada produk yang dipilih
+      if (selectedProducts.isEmpty) {
+        throw Exception("Tidak ada produk yang dipilih!");
+      }
+
+      // Konversi data produk yang dipilih menjadi format yang dibutuhkan
+      List<Map<String, dynamic>> produkData = selectedProducts.map((product) {
+        return {
+          "id_produk": product.id,
+          "jumlah": product.quantity,
+          "subTotal": product.harga! * product.quantity,
+        };
+      }).toList();
+
+      print("Produk yang dikirim ke backend: $produkData"); // Log data produk
+
+      // Ambil token jika diperlukan untuk autentikasi
+      String? token = await getToken();
+
+      // Kirim data transaksi ke server
+      final response = await _dio.post(
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/order',
         data: {
-          'kasirName': kasirName, // Menggunakan username kasir yang sudah login
-          'atasNama': aNamaController.text, // Nama Pemesan
-          'total': totalHarga(), // Total harga produk
-          'biayaLayanan': biayaLayanan, // Biaya layanan tetap
-          'subTotal': subTotalHarga(), // Subtotal harga (total + biaya layanan)
-          'nominalBayar':
-              nominalBayar, // Nominal bayar yang dimasukkan pengguna
-          'kembalian': kembalian, // Kembalian yang harus diberikan
+          'atasNama': aNamaController.text,
+          'produk': produkData,
         },
         options: Options(
           headers: {
-            'Authorization': 'Bearer $token', // Menambahkan token ke header
+            if (token != null) 'Authorization': 'Bearer $token',
           },
         ),
       );
 
-      // Menampilkan status code dan response body untuk debugging
-      print('Status Code: ${response.statusCode}');
-      print('Response Body: ${response.data}');
-
-      if (response.statusCode == 201) {
-        // Panggil pop-up dengan nominalBayar dan kembalian
-        _popupBayarBerhasil(context, kembalian, nominalBayar);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              // Diganti
-              // 'Transaksi gagal: ${response.data['message'] ?? 'Unknown error'}'
-              'Transaksi Berhasil',
-            ),
-          ),
-        );
-      }
-    } catch (e) {
+      print("Transaksi berhasil: ${response.data}");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Berhasil')),
+        SnackBar(
+          content: Text("Transaksi berhasil!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print("Gagal mengirim transaksi: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Gagal mengirim transaksi! ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-  // Fungsi untuk menambahkan quantity produk
+// Fungsi untuk menambahkan quantity produk
   void tambah(Product product) {
     setState(() {
       product.quantity++;
     });
   }
 
-  // Fungsi untuk mengurangi quantity produk
+// Fungsi untuk mengurangi quantity produk
   void kurang(Product product) {
     if (product.quantity > 1) {
       setState(() {
@@ -173,11 +158,27 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  // Fungsi untuk memilih produk dan menambahkannya ke daftar selectedProducts
+// Fungsi untuk memilih produk dan menambahkannya ke daftar selectedProducts
   void onProductSelected(Product product) {
     setState(() {
-      selectedProducts.add(product);
+      int index = selectedProducts.indexWhere((p) => p.id == product.id);
+      if (index != -1) {
+        // Jika produk sudah ada, tambah quantity-nya
+        selectedProducts[index].quantity++;
+      } else {
+        // Jika produk belum ada, tambahkan produk dengan quantity 1
+        selectedProducts.add(Product(
+          id: product.id,
+          judulProduk: product.judulProduk,
+          fotoProduk: product.fotoProduk,
+          harga: product.harga,
+          kategoriProduk: product.kategoriProduk,
+          subKategoriProduk: product.subKategoriProduk,
+          quantity: 1, // Memastikan quantity dimulai dari 1
+        ));
+      }
     });
+    print("Selected Products: ${selectedProducts}"); // Log produk yang dipilih
   }
 
   // pop-up konfirmasi pembayaran
@@ -393,18 +394,16 @@ class _HomepageState extends State<Homepage> {
                             if (inputNominal.isNotEmpty) {
                               double? nominal = double.tryParse(inputNominal);
                               if (nominal != null && nominal > 0) {
-                                // Lakukan sesuatu dengan nominal yang dimasukkan
+                                // Debug log untuk memeriksa nominal dan produk yang dipilih
                                 print("Nominal: Rp. $nominal");
+                                print("Selected Products: $selectedProducts");
 
-                                // Mengecek apakah nominal yang dimasukkan cukup
                                 if (nominal >= subTotalHarga()) {
                                   // Mengirim transaksi
                                   kirimTransaksi(); // Kirim transaksi ke server
-                                  // Menampilkan pop-up pembayaran berhasil
                                   _popupBayarBerhasil(context,
                                       nominal - subTotalHarga(), nominal);
                                 } else {
-                                  // Tampilkan pesan error jika nominal tidak cukup
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content:
@@ -414,7 +413,6 @@ class _HomepageState extends State<Homepage> {
                                   );
                                 }
                               } else {
-                                // Tampilkan pesan error jika input tidak valid
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content:

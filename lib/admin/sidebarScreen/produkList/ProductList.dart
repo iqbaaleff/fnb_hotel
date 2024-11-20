@@ -28,10 +28,12 @@ class _ProductListState extends State<ProductList> {
       final token = await _getToken();
 
       if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Token tidak ditemukan, silakan login ulang')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Token tidak ditemukan, silakan login ulang')),
+          );
+        }
         return;
       }
 
@@ -52,15 +54,20 @@ class _ProductListState extends State<ProductList> {
           _isLoading = false;
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat data: ${response.statusCode}')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Gagal memuat data: ${response.statusCode}')),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error saat mengambil produk: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan: $e')),
+        );
+      }
     }
   }
 
@@ -68,15 +75,17 @@ class _ProductListState extends State<ProductList> {
     try {
       final token = await _getToken();
       if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Token tidak ditemukan, silakan login ulang')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Token tidak ditemukan, silakan login ulang')),
+          );
+        }
         return;
       }
 
       final response = await _dio.delete(
-        '$apiUrl/$id',
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/delete/$id',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -85,29 +94,53 @@ class _ProductListState extends State<ProductList> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Produk berhasil dihapus')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Produk berhasil dihapus')),
+          );
+        }
         _fetchProducts(); // Refresh data
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Gagal menghapus produk: ${response.statusCode}')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Gagal menghapus produk: ${response.statusCode}')),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error saat menghapus produk: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan: $e')),
+        );
+      }
     }
   }
 
-  void _updateProduct(dynamic produk) {
-    // Navigasikan ke halaman update atau buka dialog update di sini
-    // Anda dapat meneruskan data produk ke halaman baru
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Fitur update belum diimplementasikan')),
+  void _confirmDelete(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Hapus'),
+          content: const Text('Apakah Anda yakin ingin menghapus produk ini?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteProduct(id);
+              },
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -136,7 +169,7 @@ class _ProductListState extends State<ProductList> {
                         dataRowColor: MaterialStateColor.resolveWith(
                             (states) => Colors.grey[200]!),
                         headingRowColor: MaterialStateColor.resolveWith(
-                            (states) => const Color(0xffE22323)),
+                            (states) => const Color(0xFF22E284)),
                         columns: const [
                           DataColumn(label: Text('No')),
                           DataColumn(label: Text('Foto')),
@@ -175,14 +208,18 @@ class _ProductListState extends State<ProductList> {
                                   icon: const Icon(Icons.delete,
                                       color: Colors.red),
                                   onPressed: () {
-                                    _deleteProduct(produk['id']);
+                                    _confirmDelete(produk['id']);
                                   },
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.edit,
                                       color: Colors.blue),
                                   onPressed: () {
-                                    _updateProduct(produk);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Fitur update belum diimplementasikan')),
+                                    );
                                   },
                                 ),
                               ],

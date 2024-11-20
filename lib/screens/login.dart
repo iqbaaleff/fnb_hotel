@@ -48,15 +48,17 @@ class _LoginState extends State<Login> {
           headers: {'Content-Type': 'application/json'},
         ),
       );
-
       if (response.statusCode == 200) {
         final role = response.data['user']['role'];
         final token = response.data['token'];
+        final kasirName =
+            response.data['user']['username']; // Mengambil username
 
-        // Simpan token dan role ke SharedPreferences
+        // Simpan token, role, dan username ke SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
         await prefs.setString('role', role);
+        await prefs.setString('username', kasirName); // Simpan username
 
         // Navigasi berdasarkan role
         if (role == 'kasir') {

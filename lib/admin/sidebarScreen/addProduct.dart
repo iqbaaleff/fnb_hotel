@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:fnb_hotel/admin/sidebarScreen/produkList/ProductList.dart';
+import 'package:fnb_hotel/logoutFunction/logoutFunction.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,6 +24,7 @@ class _AddProductState extends State<AddProduct> {
   String? _fotoProduk;
 
   final ImagePicker _picker = ImagePicker(); // Instance ImagePicker
+  final CancelToken _cancelToken = CancelToken(); // Untuk membatalkan request
 
   // API Endpoint
   final String apiUrl = 'https://74gslzvj-3000.asse.devtunnels.ms/api/produk';
@@ -38,10 +40,13 @@ class _AddProductState extends State<AddProduct> {
     if (_formKey.currentState!.validate()) {
       final token = await _getToken();
       if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Token tidak ditemukan. Silakan login kembali.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Token tidak ditemukan. Silakan login kembali.'),
+            ),
+          );
+        }
         return;
       }
 
@@ -64,52 +69,109 @@ class _AddProductState extends State<AddProduct> {
               'Authorization': 'Bearer $token', // Menambahkan token ke header
             },
           ),
+          cancelToken: _cancelToken, // Menggunakan cancelToken
         );
 
         if (response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Produk berhasil ditambahkan!')),
-          );
-
-          // Reset semua field setelah produk berhasil disimpan
-          _judulController.clear();
-          _hargaController.clear();
-          _subKategoriController.clear();
-          setState(() {
-            _kategoriProduk = 'makanan';
-            _fotoProduk = null;
-          });
+          if (mounted) {
+            setState(() {
+              _judulController.clear();
+              _hargaController.clear();
+              _subKategoriController.clear();
+              _kategoriProduk = 'makanan';
+              _fotoProduk = null;
+            });
+          }
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Produk berhasil ditambahkan!')),
+            );
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal menambahkan produk!')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Gagal menambahkan produk!')),
+            );
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi kesalahan: $e')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Terjadi kesalahan: $e')),
+          );
+        }
       }
     }
   }
 
   // Fungsi untuk memilih foto
   Future<void> _pickImage() async {
-    // Memilih gambar dari galeri
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        _fotoProduk = pickedFile.path; // Simpan path foto yang dipilih
-      });
+      if (mounted) {
+        setState(() {
+          _fotoProduk = pickedFile.path;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _cancelToken.cancel(); // Batalkan semua operasi Dio
+    _judulController.dispose();
+    _hargaController.dispose();
+    _subKategoriController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Input Produk'),
+        title: const Text('Tambah Produk'),
+        backgroundColor: Colors.white,
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              // Panggil fungsi logout
+              logout(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF22E284),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.logout_rounded,
+                  color: Colors.white,
+                ),
+                Text(
+                  "Logout",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 30,
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4.0), // Ketebalan garis
+          child: Container(
+            color: Colors.black, // Warna garis
+            height: 2.0, // Tinggi garis (ketebalan)
+          ),
+        ),
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:fnb_hotel/logoutFunction/logoutFunction.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Akun extends StatefulWidget {
@@ -80,7 +81,49 @@ class _AkunState extends State<Akun> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Form Registrasi')),
+      appBar: AppBar(
+        title: const Text('Registrasi Akun Kasir'),
+        backgroundColor: Colors.white,
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              // Panggil fungsi logout
+              logout(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF22E284),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.logout_rounded,
+                  color: Colors.white,
+                ),
+                Text(
+                  "Logout",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 30,
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4.0), // Ketebalan garis
+          child: Container(
+            color: Colors.black, // Warna garis
+            height: 2.0, // Tinggi garis (ketebalan)
+          ),
+        ),
+      ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
