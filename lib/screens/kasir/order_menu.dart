@@ -313,14 +313,42 @@ class _OrderMenuState extends State<OrderMenu> {
                             if (widget.selectedProducts.isNotEmpty) {
                               widget.popupKonfirBayar(context);
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text("Tidak ada produk yang dipilih."),
-                                  duration: Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: Color(0xffE22323),
-                                ),
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor: Color(0xffE22323),
+                                    title: Text(
+                                      "Tidak ada produk yang dipilih.",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    actions: [
+                                      Center(
+                                        child: TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "OK",
+                                            style: TextStyle(
+                                              color: Color(0xffE22323),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Menutup pop-up
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             }
                           },

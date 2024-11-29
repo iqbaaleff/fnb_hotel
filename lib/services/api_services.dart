@@ -38,6 +38,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
+        print(response.data);
         List<dynamic> data = response.data['data'];
         return data.map((product) => Product.fromJson(product)).toList();
       } else {

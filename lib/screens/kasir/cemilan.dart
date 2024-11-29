@@ -7,13 +7,12 @@ class Cemilan extends StatefulWidget {
   final Size size;
   final Function(Product) onProductSelected;
   final Function(double) formatAngka;
-  
 
   const Cemilan({
     Key? key,
     required this.size,
     required this.onProductSelected,
-     required this.formatAngka,
+    required this.formatAngka,
   }) : super(key: key);
 
   @override
@@ -57,8 +56,6 @@ class _CemilanState extends State<Cemilan> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -79,7 +76,6 @@ class _CemilanState extends State<Cemilan> {
           padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
           child: Column(
             children: [
-              
               Expanded(
                 child: FutureBuilder<List<Product>>(
                   future: _product,
@@ -100,7 +96,7 @@ class _CemilanState extends State<Cemilan> {
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 5,
                         crossAxisCount: 4,
-                        childAspectRatio: 0.95,
+                        childAspectRatio: 0.8,
                       ),
                       itemCount: products!.length,
                       itemBuilder: (context, index) {
@@ -137,7 +133,7 @@ class _CemilanState extends State<Cemilan> {
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
                                         padding: EdgeInsets.only(
@@ -165,6 +161,19 @@ class _CemilanState extends State<Cemilan> {
                                           fontSize: 12,
                                           color: Colors.grey.shade600,
                                         ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "Stok: ${product.stok != null ? product.stok!.toString() : 'Kosong'}",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),

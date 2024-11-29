@@ -158,6 +158,33 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  void onNominalChanged(String value) {
+    String rawValue = value
+        .replaceAll('Rp ', '')
+        .replaceAll('Rp.', '')
+        .replaceAll('.', '')
+        .trim();
+
+    if (rawValue.isNotEmpty) {
+      try {
+        int numberValue = int.parse(rawValue);
+        String formattedValue = NumberFormat.currency(
+                locale: "id_ID", symbol: "Rp ", decimalDigits: 0)
+            .format(numberValue);
+
+        nominalController.value = TextEditingValue(
+          text: formattedValue,
+          selection: TextSelection.collapsed(
+              offset: formattedValue.length), // Memindahkan cursor ke akhir
+        );
+      } catch (e) {
+        print("Error: $e"); // Menangkap error parsing
+      }
+    } else {
+      nominalController.value = TextEditingValue(text: '');
+    }
+  }
+
 // Fungsi untuk memilih produk dan menambahkannya ke daftar selectedProducts
   void onProductSelected(Product product) {
     setState(() {
@@ -174,6 +201,9 @@ class _HomepageState extends State<Homepage> {
           harga: product.harga,
           kategoriProduk: product.kategoriProduk,
           subKategoriProduk: product.subKategoriProduk,
+          hargaAwal: product.hargaAwal,
+          hargaJual: product.hargaJual,
+          stok: product.stok,
           quantity: 1, // Memastikan quantity dimulai dari 1
         ));
       }
@@ -186,6 +216,7 @@ class _HomepageState extends State<Homepage> {
     final size = MediaQuery.of(context).size;
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
@@ -217,38 +248,61 @@ class _HomepageState extends State<Homepage> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: size.height * 0.03),
-                        child: TextField(
-                          controller: aNamaController,
-                          decoration: InputDecoration(
-                            labelText: 'Nama Pemesan',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                  color: Color(0xffE22323)), // Border merah
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                  color: Color(0xffE22323),
-                                  width: 2), // Border merah saat fokus
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                          ),
-                        ),
-                      ),
                       Expanded(
-                        child: Container(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: size.height * 0.01),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Nama Produk"),
+                                  Text("Jumlah"),
+                                ],
+                              ),
+                              Divider(thickness: 1, color: Colors.grey),
+                              Expanded(
+                                child: selectedProducts.isNotEmpty
+                                    ? ListView.builder(
+                                        padding: EdgeInsets.all(10),
+                                        itemCount: selectedProducts.length,
+                                        itemBuilder: (context, index) {
+                                          final products =
+                                              selectedProducts[index];
+
+                                          return Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    products.judulProduk,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  Text(
+                                                    products.quantity
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        })
+                                    : Center(
+                                        child: Text("Tidak ada produk"),
+                                      ),
+                              ),
+                              Divider(thickness: 1, color: Colors.grey),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -320,6 +374,19 @@ class _HomepageState extends State<Homepage> {
                   ),
                 ),
               ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: Color(0xffE22323),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Tutup popup
+                  },
+                ),
+              ),
             ],
           ),
         );
@@ -332,6 +399,7 @@ class _HomepageState extends State<Homepage> {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
@@ -343,103 +411,161 @@ class _HomepageState extends State<Homepage> {
           ),
           content: Stack(
             children: [
-              Container(
-                width: size.width * 0.4,
-                height: size.height * 0.5,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: size.width * 0.05,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calculate_outlined,
-                            color: Color(0xffE22323),
-                            size: 40,
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            "Masukan Nominal",
-                            style: TextStyle(
-                              color: Color(0xff0C085C),
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
+              SingleChildScrollView(
+                child: Container(
+                  width: size.width * 0.4,
+                  height: size.height * 0.5,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: size.width * 0.05,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calculate_outlined,
+                              color: Color(0xffE22323),
+                              size: 40,
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              "Masukan Nominal",
+                              style: TextStyle(
+                                color: Color(0xff0C085C),
+                                fontSize: 25,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            SizedBox(width: 50),
+                            Text(
+                              "Total: Rp. ${subTotalHarga() != null ? formatAngka(subTotalHarga().toDouble()) : 'Tidak ada harga'}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        // TextField untuk input nominal
+                        TextField(
+                          controller: nominalController,
+                          onChanged: onNominalChanged,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Masukan Nominal',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                  color: Color(0xffE22323)), // Border merah
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                  color: Color(0xffE22323),
+                                  width: 2), // Border merah saat fokus
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
                             ),
                           ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      // TextField untuk input nominal
-                      TextField(
-                        controller: nominalController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          prefixText: "Rp. ",
                         ),
-                      ),
-                      SizedBox(height: 20),
-                      // Tombol Bayar
-                      Container(
-                        width: size.width * 0.2,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            String inputNominal = nominalController.text.trim();
-                            if (inputNominal.isNotEmpty) {
-                              double? nominal = double.tryParse(inputNominal);
-                              if (nominal != null && nominal > 0) {
-                                // Debug log untuk memeriksa nominal dan produk yang dipilih
-                                print("Nominal: Rp. $nominal");
-                                print("Selected Products: $selectedProducts");
-
-                                if (nominal >= subTotalHarga()) {
-                                  // Mengirim transaksi
-                                  kirimTransaksi(); // Kirim transaksi ke server
-                                  _popupBayarBerhasil(context,
-                                      nominal - subTotalHarga(), nominal);
+                        Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: size.height * 0.03),
+                          child: TextField(
+                            controller: aNamaController,
+                            decoration: InputDecoration(
+                              labelText: 'Nama Pemesan',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                    color: Color(0xffE22323)), // Border merah
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                    color: Color(0xffE22323),
+                                    width: 2), // Border merah saat fokus
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        // Tombol Bayar
+                        Container(
+                          width: size.width * 0.2,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              String inputNominal = nominalController.text.trim();
+                              if (inputNominal.isNotEmpty) {
+                                double? nominal = double.tryParse(inputNominal);
+                                if (nominal != null && nominal > 0) {
+                                  // Debug log untuk memeriksa nominal dan produk yang dipilih
+                                  print("Nominal: Rp. $nominal");
+                                  print("Selected Products: $selectedProducts");
+                
+                                  if (nominal >= subTotalHarga()) {
+                                    // Mengirim transaksi
+                                    kirimTransaksi(); // Kirim transaksi ke server
+                                    _popupBayarBerhasil(context,
+                                        nominal - subTotalHarga(), nominal);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text("Nominal bayar tidak cukup!"),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content:
-                                          Text("Nominal bayar tidak cukup!"),
+                                          Text("Masukkan nominal yang valid!"),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
                                 }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text("Masukkan nominal yang valid!"),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
                               }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xffE22323),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xffE22323),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            "Bayar",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                            child: Text(
+                              "Bayar",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -468,6 +594,7 @@ class _HomepageState extends State<Homepage> {
     final size = MediaQuery.of(context).size;
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
@@ -656,225 +783,230 @@ class _HomepageState extends State<Homepage> {
     List<String> minuman = kategori["minuman"] ?? [];
 
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: size.width * 0.005,
-        ),
-        child: Row(
-          children: [
-            // Bagian Kiri
-            Container(
-              width: size.width * 0.6,
-              height: size.height,
-              child: Column(
-                children: [
-                  // Bar
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        // Logo
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical: size.height * 0.005,
-                              horizontal: size.width * 0.01),
-                          child: Image.asset("assets/images/logo.png"),
-                        ),
-                        // Fnb text
-                        Text(
-                          "Food & Beverage",
-                          style: TextStyle(
-                            color: Color(0xff0C085C),
-                            fontSize: 30,
-                            fontWeight: FontWeight.w700,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: size.width * 0.005,
+          ),
+          child: Row(
+            children: [
+              // Bagian Kiri
+              Container(
+                width: size.width * 0.6,
+                height: size.height,
+                child: Column(
+                  children: [
+                    // Bar
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          // Logo
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: size.height * 0.005,
+                                horizontal: size.width * 0.01),
+                            child: Image.asset("assets/images/logo.png"),
                           ),
-                        ),
-                        // Search Bar
-                      ],
+                          // Fnb text
+                          Text(
+                            "Food & Beverage",
+                            style: TextStyle(
+                              color: Color(0xff0C085C),
+                              fontSize: 30,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          // Search Bar
+                        ],
+                      ),
                     ),
-                  ),
-                  Divider(
-                    color: Color(0xff8B8B8B),
-                    height: 10,
-                  ),
-                  // List Menu
-                  Expanded(
-                    flex: 9,
-                    child: Row(
-                      children: [
-                        // ListView with menu items
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                right: BorderSide(
-                                  color: Color(0xff8B8B8B),
-                                  width: 1,
+                    Divider(
+                      color: Color(0xff8B8B8B),
+                      height: 10,
+                    ),
+                    // List Menu
+                    Expanded(
+                      flex: 9,
+                      child: Row(
+                        children: [
+                          // ListView with menu items
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
+                                    color: Color(0xff8B8B8B),
+                                    width: 1,
+                                  ),
                                 ),
                               ),
+                              child: Column(
+                                children: [
+                                  // Kategori Makanan
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: size.width * 0.01),
+                                        child: Image.asset(
+                                            "assets/images/rice 1.png"),
+                                      ),
+                                      Text(
+                                        "Makanan",
+                                        style: TextStyle(
+                                          color: Color(0xff0C085C),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount: makanan.length,
+                                      itemBuilder: (context, index) {
+                                        final item = makanan[index];
+
+                                        return ListTile(
+                                          title: Text(
+                                            item,
+                                            style: TextStyle(
+                                              color: _selectedCategory ==
+                                                      makanan[index]
+                                                  ? Colors.white
+                                                  : null,
+                                            ),
+                                          ),
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedCategory =
+                                                  makanan[index];
+                                              _selectedCategoryIndex =
+                                                  "Makanan";
+
+                                              _currentIndex = index;
+                                            });
+                                          },
+                                          tileColor: _selectedCategory ==
+                                                  makanan[index]
+                                              ? Color(0xffE22323)
+                                              : null, // Ganti warna jika kategori dipilih
+                                          selectedTileColor: Color(
+                                              0xffE22323), // Warna saat item aktif
+                                          selected: _selectedCategory ==
+                                              makanan[
+                                                  index], // Menandai jika kategori ini dipilih
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  // Kategori Minuman
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: size.width * 0.01),
+                                        child: Image.asset(
+                                            "assets/images/coffee-cup 2.png"),
+                                      ),
+                                      Text(
+                                        "Minuman",
+                                        style: TextStyle(
+                                          color: Color(0xff0C085C),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount: minuman.length,
+                                      itemBuilder: (context, index) {
+                                        final item = minuman[index];
+
+                                        return ListTile(
+                                          title: Text(
+                                            item,
+                                            style: TextStyle(
+                                              color: _selectedCategory ==
+                                                      minuman[index]
+                                                  ? Colors.white
+                                                  : null,
+                                            ),
+                                          ),
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedCategory =
+                                                  minuman[index];
+                                              _selectedCategoryIndex =
+                                                  "Minuman";
+
+                                              _currentIndex = index;
+                                            });
+                                          },
+                                          tileColor: _selectedCategory ==
+                                                  minuman[index]
+                                              ? Color(0xffE22323)
+                                              : null, // Ganti warna jika kategori dipilih
+                                          selectedTileColor: Color(
+                                              0xffE22323), // Warna saat item aktif
+                                          selected: _selectedCategory ==
+                                              minuman[
+                                                  index], // Menandai jika kategori ini dipilih
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Column(
+                          ),
+                          // Tampilan Konten Berdasarkan Kategori
+                          Expanded(
+                            flex: 6,
+                            child: IndexedStack(
+                              index:
+                                  _currentIndex, // Index berubah sesuai dengan halaman yang dipilih
                               children: [
-                                // Kategori Makanan
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: size.width * 0.01),
-                                      child: Image.asset(
-                                          "assets/images/rice 1.png"),
-                                    ),
-                                    Text(
-                                      "Makanan",
-                                      style: TextStyle(
-                                        color: Color(0xff0C085C),
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: makanan.length,
-                                    itemBuilder: (context, index) {
-                                      final item = makanan[index];
-
-                                      return ListTile(
-                                        title: Text(
-                                          item,
-                                          style: TextStyle(
-                                            color: _selectedCategory ==
-                                                    makanan[index]
-                                                ? Colors.white
-                                                : null,
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedCategory = makanan[index];
-                                            _selectedCategoryIndex = "Makanan";
-
-                                            _currentIndex = index;
-                                          });
-                                        },
-                                        tileColor: _selectedCategory ==
-                                                makanan[index]
-                                            ? Color(0xffE22323)
-                                            : null, // Ganti warna jika kategori dipilih
-                                        selectedTileColor: Color(
-                                            0xffE22323), // Warna saat item aktif
-                                        selected: _selectedCategory ==
-                                            makanan[
-                                                index], // Menandai jika kategori ini dipilih
-                                      );
-                                    },
+                                if (_selectedCategoryIndex == "Makanan") ...[
+                                  Cemilan(
+                                    formatAngka: formatAngka,
+                                    size: size,
+                                    onProductSelected: onProductSelected,
                                   ),
-                                ),
-                                // Kategori Minuman
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: size.width * 0.01),
-                                      child: Image.asset(
-                                          "assets/images/coffee-cup 2.png"),
-                                    ),
-                                    Text(
-                                      "Minuman",
-                                      style: TextStyle(
-                                        color: Color(0xff0C085C),
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: minuman.length,
-                                    itemBuilder: (context, index) {
-                                      final item = minuman[index];
-
-                                      return ListTile(
-                                        title: Text(
-                                          item,
-                                          style: TextStyle(
-                                            color: _selectedCategory ==
-                                                    minuman[index]
-                                                ? Colors.white
-                                                : null,
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedCategory = minuman[index];
-                                            _selectedCategoryIndex = "Minuman";
-
-                                            _currentIndex = index;
-                                          });
-                                        },
-                                        tileColor: _selectedCategory ==
-                                                minuman[index]
-                                            ? Color(0xffE22323)
-                                            : null, // Ganti warna jika kategori dipilih
-                                        selectedTileColor: Color(
-                                            0xffE22323), // Warna saat item aktif
-                                        selected: _selectedCategory ==
-                                            minuman[
-                                                index], // Menandai jika kategori ini dipilih
-                                      );
-                                    },
+                                ],
+                                if (_selectedCategoryIndex == "Minuman") ...[
+                                  Coffe(
+                                    formatAngka: formatAngka,
+                                    size: size,
+                                    onProductSelected: onProductSelected,
                                   ),
-                                ),
+                                ],
                               ],
                             ),
                           ),
-                        ),
-                        // Tampilan Konten Berdasarkan Kategori
-                        Expanded(
-                          flex: 6,
-                          child: IndexedStack(
-                            index:
-                                _currentIndex, // Index berubah sesuai dengan halaman yang dipilih
-                            children: [
-                              
-                              if (_selectedCategoryIndex == "Makanan") ...[
-                                Cemilan(
-                                  formatAngka: formatAngka,
-                                  size: size,
-                                  onProductSelected: onProductSelected,
-                                ),
-                              ],
-                              if (_selectedCategoryIndex == "Minuman") ...[
-                                Coffe(
-                                  formatAngka: formatAngka,
-                                  size: size,
-                                  onProductSelected: onProductSelected,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            // Order Menu
-            OrderMenu(
-              formatAngka: formatAngka,
-              selectedProducts: selectedProducts,
-              size: size,
-              totalHarga: totalHarga,
-              popupKonfirBayar: popupKonfirBayar,
-              kurang: kurang,
-              tambah: tambah,
-            ),
-          ],
+              // Order Menu
+              OrderMenu(
+                formatAngka: formatAngka,
+                selectedProducts: selectedProducts,
+                size: size,
+                totalHarga: totalHarga,
+                popupKonfirBayar: popupKonfirBayar,
+                kurang: kurang,
+                tambah: tambah,
+              ),
+            ],
+          ),
         ),
       ),
     );
