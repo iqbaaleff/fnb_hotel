@@ -3,12 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/services/api_services.dart';
 import 'package:fnb_hotel/models/produk.dart';
 
-class Cemilan extends StatefulWidget {
+class Snack extends StatefulWidget {
   final Size size;
   final Function(Product) onProductSelected;
   final Function(double) formatAngka;
 
-  const Cemilan({
+  const Snack({
     Key? key,
     required this.size,
     required this.onProductSelected,
@@ -16,10 +16,10 @@ class Cemilan extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<Cemilan> createState() => _CemilanState();
+  State<Snack> createState() => _SnackState();
 }
 
-class _CemilanState extends State<Cemilan> {
+class _SnackState extends State<Snack> {
   Future<List<Product>>? _product;
   String? _token;
 
@@ -37,7 +37,7 @@ class _CemilanState extends State<Cemilan> {
       if (token != null) {
         setState(() {
           _token = token;
-          _product = ApiService().getProductsCemilan();
+          _product = ApiService().getProductsSnack();
         });
       } else {
         if (mounted) {
@@ -63,15 +63,6 @@ class _CemilanState extends State<Cemilan> {
       child: Container(
         width: widget.size.width,
         height: widget.size.height,
-        decoration: BoxDecoration(
-          color: const Color(0xffF4F4F4),
-          border: const Border(
-            left: BorderSide(
-              color: Color(0xff8B8B8B),
-              width: 1,
-            ),
-          ),
-        ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
           child: Column(
@@ -95,8 +86,8 @@ class _CemilanState extends State<Cemilan> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 5,
-                        crossAxisCount: 4,
-                        childAspectRatio: 0.8,
+                        crossAxisCount: 5,
+                        childAspectRatio: 0.85,
                       ),
                       itemCount: products!.length,
                       itemBuilder: (context, index) {

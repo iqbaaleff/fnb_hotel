@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fnb_hotel/models/produk.dart';
-import 'package:fnb_hotel/screens/kasir/cemilan.dart';
-import 'package:fnb_hotel/screens/kasir/coffe.dart';
+import 'package:fnb_hotel/screens/kasir/makanan.dart';
+import 'package:fnb_hotel/screens/kasir/minuman.dart';
 import 'package:fnb_hotel/screens/kasir/order_menu.dart';
+import 'package:fnb_hotel/screens/kasir/snack.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,9 +18,8 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  String _selectedCategory = "Cemilan";
-  String _selectedCategoryIndex = "Makanan";
   int _currentIndex = 0;
+  int selectedColor = 0;
   List<Product> selectedProducts = [];
   String kasirName = '';
   double biayaLayanan = 3000;
@@ -29,10 +29,31 @@ class _HomepageState extends State<Homepage> {
   final TextEditingController totalHargaController = TextEditingController();
   final TextEditingController nominalController = TextEditingController();
 
+  final NumberFormat currencyFormat = NumberFormat.currency(
+    locale: 'id_ID', // Locale Indonesia
+    symbol: 'Rp ', // Simbol mata uang
+    decimalDigits: 0,
+  );
+
   Map<String, List<String>> kategori = {
     "makanan": ["Cemilan", "Coming Soon"],
     "minuman": ["Coffe", "Soon"]
   };
+
+  List<String> category = ["Food", "Beverage", "Snack"];
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case "Food":
+        return Icons.fastfood;
+      case "Beverage":
+        return Icons.local_drink;
+      case "Snack":
+        return Icons.cookie;
+      default:
+        return Icons.help; // Ikon default
+    }
+  }
 
 // Rupiah
   String formatAngka(double angka) {
@@ -54,6 +75,26 @@ class _HomepageState extends State<Homepage> {
       return sum + (product.harga! * product.quantity);
     });
     return totalHarga + biayaLayanan;
+  }
+
+  @override
+  void dispose() {
+    nominalController.dispose();
+    super.dispose();
+  }
+
+  void _onNominalChanged(String value) {
+    String sanitizedValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (sanitizedValue.isNotEmpty) {
+      final int parsedValue = int.parse(sanitizedValue);
+      final String formattedValue = currencyFormat.format(parsedValue);
+      nominalController.value = TextEditingValue(
+        text: formattedValue,
+        selection: TextSelection.collapsed(offset: formattedValue.length),
+      );
+    } else {
+      nominalController.clear();
+    }
   }
 
   @override
@@ -155,33 +196,6 @@ class _HomepageState extends State<Homepage> {
       setState(() {
         product.quantity--;
       });
-    }
-  }
-
-  void onNominalChanged(String value) {
-    String rawValue = value
-        .replaceAll('Rp ', '')
-        .replaceAll('Rp.', '')
-        .replaceAll('.', '')
-        .trim();
-
-    if (rawValue.isNotEmpty) {
-      try {
-        int numberValue = int.parse(rawValue);
-        String formattedValue = NumberFormat.currency(
-                locale: "id_ID", symbol: "Rp ", decimalDigits: 0)
-            .format(numberValue);
-
-        nominalController.value = TextEditingValue(
-          text: formattedValue,
-          selection: TextSelection.collapsed(
-              offset: formattedValue.length), // Memindahkan cursor ke akhir
-        );
-      } catch (e) {
-        print("Error: $e"); // Menangkap error parsing
-      }
-    } else {
-      nominalController.value = TextEditingValue(text: '');
     }
   }
 
@@ -457,7 +471,7 @@ class _HomepageState extends State<Homepage> {
                         // TextField untuk input nominal
                         TextField(
                           controller: nominalController,
-                          onChanged: onNominalChanged,
+                          onChanged: _onNominalChanged,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: 'Masukan Nominal',
@@ -482,8 +496,8 @@ class _HomepageState extends State<Homepage> {
                           ),
                         ),
                         Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: size.height * 0.03),
+                          padding: EdgeInsets.symmetric(
+                              vertical: size.height * 0.03),
                           child: TextField(
                             controller: aNamaController,
                             decoration: InputDecoration(
@@ -515,35 +529,107 @@ class _HomepageState extends State<Homepage> {
                           width: size.width * 0.2,
                           child: ElevatedButton(
                             onPressed: () {
-                              String inputNominal = nominalController.text.trim();
-                              if (inputNominal.isNotEmpty) {
-                                double? nominal = double.tryParse(inputNominal);
+                              String inputNominal =
+                                  nominalController.text.trim();
+
+                              // Menghapus simbol "Rp" dan tanda koma dari input
+                              String sanitizedInput = inputNominal.replaceAll(
+                                  RegExp(r'[^0-9]'), '');
+
+                              if (sanitizedInput.isNotEmpty) {
+                                double? nominal =
+                                    double.tryParse(sanitizedInput);
                                 if (nominal != null && nominal > 0) {
                                   // Debug log untuk memeriksa nominal dan produk yang dipilih
                                   print("Nominal: Rp. $nominal");
                                   print("Selected Products: $selectedProducts");
-                
+
                                   if (nominal >= subTotalHarga()) {
                                     // Mengirim transaksi
                                     kirimTransaksi(); // Kirim transaksi ke server
-                                    _popupBayarBerhasil(context,
-                                        nominal - subTotalHarga(), nominal);
+                                    _popupBayarBerhasil(
+                                      context,
+                                      nominal - subTotalHarga(),
+                                      nominal,
+                                    );
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text("Nominal bayar tidak cukup!"),
-                                        backgroundColor: Colors.red,
-                                      ),
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          backgroundColor: Color(0xffE22323),
+                                          title: Text(
+                                            "Nominal Tidak Cukup!",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          actions: [
+                                            Center(
+                                              child: TextButton(
+                                                style: TextButton.styleFrom(
+                                                  backgroundColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  "OK",
+                                                  style: TextStyle(
+                                                    color: Color(0xffE22323),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(); // Menutup pop-up
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     );
                                   }
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content:
-                                          Text("Masukkan nominal yang valid!"),
-                                      backgroundColor: Colors.red,
-                                    ),
+                                  // Menampilkan pesan untuk nominal tidak valid
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        backgroundColor: Color(0xffE22323),
+                                        title: Text(
+                                          "Masukan Nominal Yang Valid!!",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        actions: [
+                                          Center(
+                                            child: TextButton(
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                "OK",
+                                                style: TextStyle(
+                                                  color: Color(0xffE22323),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pop(); // Menutup pop-up
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
                                 }
                               }
@@ -809,15 +895,74 @@ class _HomepageState extends State<Homepage> {
                             child: Image.asset("assets/images/logo.png"),
                           ),
                           // Fnb text
-                          Text(
-                            "Food & Beverage",
-                            style: TextStyle(
-                              color: Color(0xff0C085C),
-                              fontSize: 30,
-                              fontWeight: FontWeight.w700,
+                          Expanded(
+                            child: Text(
+                              "Food & Beverage",
+                              style: TextStyle(
+                                color: Color(0xff0C085C),
+                                fontSize: 30,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                          // Search Bar
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: size.width * 0.01),
+                            child: Wrap(
+                              spacing: 10,
+                              children: List.generate(category.length, (index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedColor = index;
+                                      _currentIndex = index;
+                                    });
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: Duration(milliseconds: 300),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: selectedColor == index
+                                          ? const Color(0xffE22323)
+                                          : Colors.transparent,
+                                      border: Border.all(
+                                        color: selectedColor == index
+                                            ? Color(0xffE22323)
+                                            : Colors.grey,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Menambahkan ikon berdasarkan indeks atau kategori
+                                        Icon(
+                                          _getCategoryIcon(category[index]),
+                                          color: selectedColor == index
+                                              ? Colors.white
+                                              : Colors.grey,
+                                          size: 20,
+                                        ),
+                                        SizedBox(
+                                            width:
+                                                8), // Jarak antara ikon dan teks
+                                        Text(
+                                          category[index],
+                                          style: TextStyle(
+                                            color: selectedColor == index
+                                                ? Colors.white
+                                                : Colors.grey,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -826,167 +971,27 @@ class _HomepageState extends State<Homepage> {
                       height: 10,
                     ),
                     // List Menu
+
                     Expanded(
-                      flex: 9,
-                      child: Row(
+                      flex: 6,
+                      child: IndexedStack(
+                        index:
+                            _currentIndex, // Index berubah sesuai dengan halaman yang dipilih
                         children: [
-                          // ListView with menu items
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  right: BorderSide(
-                                    color: Color(0xff8B8B8B),
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  // Kategori Makanan
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: size.width * 0.01),
-                                        child: Image.asset(
-                                            "assets/images/rice 1.png"),
-                                      ),
-                                      Text(
-                                        "Makanan",
-                                        style: TextStyle(
-                                          color: Color(0xff0C085C),
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      itemCount: makanan.length,
-                                      itemBuilder: (context, index) {
-                                        final item = makanan[index];
-
-                                        return ListTile(
-                                          title: Text(
-                                            item,
-                                            style: TextStyle(
-                                              color: _selectedCategory ==
-                                                      makanan[index]
-                                                  ? Colors.white
-                                                  : null,
-                                            ),
-                                          ),
-                                          onTap: () {
-                                            setState(() {
-                                              _selectedCategory =
-                                                  makanan[index];
-                                              _selectedCategoryIndex =
-                                                  "Makanan";
-
-                                              _currentIndex = index;
-                                            });
-                                          },
-                                          tileColor: _selectedCategory ==
-                                                  makanan[index]
-                                              ? Color(0xffE22323)
-                                              : null, // Ganti warna jika kategori dipilih
-                                          selectedTileColor: Color(
-                                              0xffE22323), // Warna saat item aktif
-                                          selected: _selectedCategory ==
-                                              makanan[
-                                                  index], // Menandai jika kategori ini dipilih
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  // Kategori Minuman
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: size.width * 0.01),
-                                        child: Image.asset(
-                                            "assets/images/coffee-cup 2.png"),
-                                      ),
-                                      Text(
-                                        "Minuman",
-                                        style: TextStyle(
-                                          color: Color(0xff0C085C),
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      itemCount: minuman.length,
-                                      itemBuilder: (context, index) {
-                                        final item = minuman[index];
-
-                                        return ListTile(
-                                          title: Text(
-                                            item,
-                                            style: TextStyle(
-                                              color: _selectedCategory ==
-                                                      minuman[index]
-                                                  ? Colors.white
-                                                  : null,
-                                            ),
-                                          ),
-                                          onTap: () {
-                                            setState(() {
-                                              _selectedCategory =
-                                                  minuman[index];
-                                              _selectedCategoryIndex =
-                                                  "Minuman";
-
-                                              _currentIndex = index;
-                                            });
-                                          },
-                                          tileColor: _selectedCategory ==
-                                                  minuman[index]
-                                              ? Color(0xffE22323)
-                                              : null, // Ganti warna jika kategori dipilih
-                                          selectedTileColor: Color(
-                                              0xffE22323), // Warna saat item aktif
-                                          selected: _selectedCategory ==
-                                              minuman[
-                                                  index], // Menandai jika kategori ini dipilih
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          Makanan(
+                            formatAngka: formatAngka,
+                            size: size,
+                            onProductSelected: onProductSelected,
                           ),
-                          // Tampilan Konten Berdasarkan Kategori
-                          Expanded(
-                            flex: 6,
-                            child: IndexedStack(
-                              index:
-                                  _currentIndex, // Index berubah sesuai dengan halaman yang dipilih
-                              children: [
-                                if (_selectedCategoryIndex == "Makanan") ...[
-                                  Cemilan(
-                                    formatAngka: formatAngka,
-                                    size: size,
-                                    onProductSelected: onProductSelected,
-                                  ),
-                                ],
-                                if (_selectedCategoryIndex == "Minuman") ...[
-                                  Coffe(
-                                    formatAngka: formatAngka,
-                                    size: size,
-                                    onProductSelected: onProductSelected,
-                                  ),
-                                ],
-                              ],
-                            ),
+                          Minuman(
+                            formatAngka: formatAngka,
+                            size: size,
+                            onProductSelected: onProductSelected,
+                          ),
+                          Snack(
+                            formatAngka: formatAngka,
+                            size: size,
+                            onProductSelected: onProductSelected,
                           ),
                         ],
                       ),

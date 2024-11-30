@@ -18,7 +18,7 @@ class ApiService {
   }
 
   /// API Cemilan
-  Future<List<Product>> getProductsCemilan() async {
+  Future<List<Product>> getProductsMakanan() async {
     const String url =
         'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/cemilan';
 
@@ -38,7 +38,6 @@ class ApiService {
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
-        print(response.data);
         List<dynamic> data = response.data['data'];
         return data.map((product) => Product.fromJson(product)).toList();
       } else {
@@ -53,9 +52,42 @@ class ApiService {
   }
 
   /// API Coffe
-  Future<List<Product>> getProductsCoffe() async {
+  Future<List<Product>> getProductsMinuman() async {
     const String url =
         'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/coffe';
+
+    try {
+      final token = await getToken();
+      if (token == null) {
+        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+      }
+
+      Response response = await _dio.get(
+        url,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token', // Tambahkan token ke header
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        List<dynamic> data = response.data['data'];
+        return data.map((product) => Product.fromJson(product)).toList();
+      } else {
+        throw Exception(
+          'Error ${response.statusCode}: ${response.data['message'] ?? 'Tidak diketahui'}',
+        );
+      }
+    } catch (e) {
+      print('Kesalahan API Coffee: $e');
+      throw Exception('Gagal memuat produk coffee: $e');
+    }
+  }
+  /// API 
+  Future<List<Product>> getProductsSnack() async {
+    const String url =
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk';
 
     try {
       final token = await getToken();
