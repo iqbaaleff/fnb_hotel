@@ -196,6 +196,7 @@ class _RiwayatState extends State<Riwayat> {
                           headingRowColor: MaterialStateColor.resolveWith(
                               (states) => const Color(0xFF22E284)),
                           columns: [
+                            DataColumn(label: Text('Order No')),
                             DataColumn(label: Text('Nama Pemesan')),
                             DataColumn(label: Text('Kasir')),
                             DataColumn(label: Text('Total Harga')),
@@ -205,6 +206,7 @@ class _RiwayatState extends State<Riwayat> {
                           ],
                           rows: transaksiList.map((transaksi) {
                             return DataRow(cells: [
+                              DataCell(Text(transaksi['order_id'] ?? '-')),
                               DataCell(Text(transaksi['atasNama'] ?? '-')),
                               DataCell(Text(transaksi['kasirName'] ?? '-')),
                               DataCell(Text('Rp ${transaksi['total']}')),
