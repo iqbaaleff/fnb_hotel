@@ -1,10 +1,13 @@
 class Product {
-  final int? id;
+  final num? id;
   final String judulProduk;
   final String? fotoProduk;
-  final int? harga;
+  final num? harga;
   final String? kategoriProduk;
   final String? subKategoriProduk;
+  final num? hargaAwal;
+  final num? hargaJual;
+  final num? stok;
   int quantity;
 
   Product({
@@ -14,6 +17,9 @@ class Product {
     required this.harga,
     required this.kategoriProduk,
     required this.subKategoriProduk,
+    required this.hargaAwal,
+    required this.hargaJual,
+    required this.stok,
     this.quantity = 1,
   });
 
@@ -25,6 +31,9 @@ class Product {
       harga: json['harga'] ?? 0,
       kategoriProduk: json['kategori_produk'] ?? 'Tanpa Kategori',
       subKategoriProduk: json['sub_kategori_produk'] ?? 'Tanpa Sub Kategori',
+      hargaAwal: json['hargaAwal'] ?? 0,
+      hargaJual: json['hargaJual'] ?? 0,
+      stok: json['stok'] ?? 0,
       quantity: 1,
     );
   }

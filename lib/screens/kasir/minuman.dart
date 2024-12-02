@@ -3,12 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/services/api_services.dart';
 import 'package:fnb_hotel/models/produk.dart';
 
-class Coffe extends StatefulWidget {
+class Minuman extends StatefulWidget {
   final Size size;
   final Function(Product) onProductSelected;
   final Function(double) formatAngka;
 
-  Coffe({
+  const Minuman({
     Key? key,
     required this.size,
     required this.onProductSelected,
@@ -16,31 +16,43 @@ class Coffe extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<Coffe> createState() => _CoffeState();
+  State<Minuman> createState() => _MinumanState();
 }
 
-class _CoffeState extends State<Coffe> {
-  late Future<List<Product>> _product;
+class _MinumanState extends State<Minuman> {
+  Future<List<Product>>? _product;
+  String? _token;
 
   @override
   void initState() {
     super.initState();
-    _product = ApiService().getProductsCoffe();
+    _loadToken(); // Ambil token saat widget diinisialisasi
   }
 
-  /// Fungsi untuk memeriksa apakah token tersimpan
-  Future<void> _checkToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+  Future<void> _loadToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
 
-    if (token != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Token tersimpan: $token')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Token tidak ditemukan')),
-      );
+      if (token != null) {
+        setState(() {
+          _token = token;
+          _product = ApiService().getProductsMinuman();
+        });
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Token tidak ditemukan, silakan login ulang')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan saat mengambil token: $e')),
+        );
+      }
     }
   }
 
@@ -51,15 +63,6 @@ class _CoffeState extends State<Coffe> {
       child: Container(
         width: widget.size.width,
         height: widget.size.height,
-        decoration: BoxDecoration(
-          color: const Color(0xffF4F4F4),
-          border: const Border(
-            left: BorderSide(
-              color: Color(0xff8B8B8B),
-              width: 1,
-            ),
-          ),
-        ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
           child: Column(
@@ -83,8 +86,8 @@ class _CoffeState extends State<Coffe> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 5,
-                        crossAxisCount: 4,
-                        childAspectRatio: 0.95,
+                        crossAxisCount: 5,
+                        childAspectRatio: 0.85,
                       ),
                       itemCount: products!.length,
                       itemBuilder: (context, index) {
@@ -121,7 +124,7 @@ class _CoffeState extends State<Coffe> {
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
                                         padding: EdgeInsets.only(
@@ -149,6 +152,19 @@ class _CoffeState extends State<Coffe> {
                                           fontSize: 12,
                                           color: Colors.grey.shade600,
                                         ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "Stok: ${product.stok != null ? product.stok!.toString() : 'Kosong'}",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),

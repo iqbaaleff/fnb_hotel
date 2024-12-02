@@ -3,24 +3,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/services/api_services.dart';
 import 'package:fnb_hotel/models/produk.dart';
 
-class Cemilan extends StatefulWidget {
+class Snack extends StatefulWidget {
   final Size size;
   final Function(Product) onProductSelected;
   final Function(double) formatAngka;
-  
 
-  const Cemilan({
+  const Snack({
     Key? key,
     required this.size,
     required this.onProductSelected,
-     required this.formatAngka,
+    required this.formatAngka,
   }) : super(key: key);
 
   @override
-  State<Cemilan> createState() => _CemilanState();
+  State<Snack> createState() => _SnackState();
 }
 
-class _CemilanState extends State<Cemilan> {
+class _SnackState extends State<Snack> {
   Future<List<Product>>? _product;
   String? _token;
 
@@ -38,7 +37,7 @@ class _CemilanState extends State<Cemilan> {
       if (token != null) {
         setState(() {
           _token = token;
-          _product = ApiService().getProductsCemilan();
+          _product = ApiService().getProductsSnack();
         });
       } else {
         if (mounted) {
@@ -57,8 +56,6 @@ class _CemilanState extends State<Cemilan> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -66,20 +63,10 @@ class _CemilanState extends State<Cemilan> {
       child: Container(
         width: widget.size.width,
         height: widget.size.height,
-        decoration: BoxDecoration(
-          color: const Color(0xffF4F4F4),
-          border: const Border(
-            left: BorderSide(
-              color: Color(0xff8B8B8B),
-              width: 1,
-            ),
-          ),
-        ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
           child: Column(
             children: [
-              
               Expanded(
                 child: FutureBuilder<List<Product>>(
                   future: _product,
@@ -99,8 +86,8 @@ class _CemilanState extends State<Cemilan> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 5,
-                        crossAxisCount: 4,
-                        childAspectRatio: 0.95,
+                        crossAxisCount: 5,
+                        childAspectRatio: 0.85,
                       ),
                       itemCount: products!.length,
                       itemBuilder: (context, index) {
@@ -137,7 +124,7 @@ class _CemilanState extends State<Cemilan> {
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
                                         padding: EdgeInsets.only(
@@ -165,6 +152,19 @@ class _CemilanState extends State<Cemilan> {
                                           fontSize: 12,
                                           color: Colors.grey.shade600,
                                         ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "Stok: ${product.stok != null ? product.stok!.toString() : 'Kosong'}",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
