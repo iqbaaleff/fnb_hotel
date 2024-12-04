@@ -323,6 +323,7 @@ class _OrderMenuState extends State<OrderMenu> {
                                       style: TextStyle(
                                         color: Colors.white,
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
                                     actions: [
                                       Center(
