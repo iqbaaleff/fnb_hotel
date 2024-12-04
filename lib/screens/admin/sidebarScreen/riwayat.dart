@@ -55,12 +55,6 @@ class _RiwayatState extends State<Riwayat> {
       }
     } catch (e) {
       print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -89,9 +83,11 @@ class _RiwayatState extends State<Riwayat> {
         title: const Text(
           'Riwayat Transaksi',
           style: TextStyle(
-            color: Color(0xFF22E284),
+            color: Color(0xff0C085C),
+            fontWeight: FontWeight.bold,
           ),
         ),
+        
         backgroundColor: Colors.white,
         actions: [
           ElevatedButton(
@@ -100,7 +96,7 @@ class _RiwayatState extends State<Riwayat> {
               logout(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF22E284),
+              backgroundColor: Color(0xffE22323),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -127,14 +123,14 @@ class _RiwayatState extends State<Riwayat> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0), // Ketebalan garis
           child: Container(
-            color: Color(0xFF22E284), // Warna garis
+            color: Color(0xffE22323), // Warna garis
             height: 2.0, // Tinggi garis (ketebalan)
           ),
         ),
       ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
         child: transaksiList.isEmpty
             ? Center(
                 child:
@@ -150,7 +146,7 @@ class _RiwayatState extends State<Riwayat> {
                     dataRowColor: MaterialStateColor.resolveWith(
                         (states) => Colors.grey[200]!),
                     headingRowColor: MaterialStateColor.resolveWith(
-                        (states) => const Color(0xFF22E284)),
+                        (states) => const Color(0xffE22323)),
                     columns: [
                       DataColumn(label: Text('Order No')),
                       DataColumn(label: Text('Tanggal')),

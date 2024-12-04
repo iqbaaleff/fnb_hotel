@@ -46,8 +46,8 @@ class ApiService {
         );
       }
     } catch (e) {
-      print('Kesalahan API Cemilan: $e');
-      throw Exception('Gagal memuat produk cemilan: $e');
+      print('Kesalahan API Makanan: $e');
+      throw Exception('Gagal memuat produk makanan: $e');
     }
   }
 
@@ -80,13 +80,13 @@ class ApiService {
         );
       }
     } catch (e) {
-      print('Kesalahan API Coffee: $e');
-      throw Exception('Gagal memuat produk coffee: $e');
+      print('Kesalahan API Minuman: $e');
+      throw Exception('Gagal memuat produk Minuman: $e');
     }
   }
 
   /// API
-  Future<List<Product>> getProductsSnack() async {
+  Future<List<Product>> getProductsCemilan() async {
     const String url =
         'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/Cemilan';
 
@@ -114,8 +114,8 @@ class ApiService {
         );
       }
     } catch (e) {
-      print('Kesalahan API Coffee: $e');
-      throw Exception('Gagal memuat produk coffee: $e');
+      print('Kesalahan API Cemilan: $e');
+      throw Exception('Gagal memuat produk Cemilan: $e');
     }
   }
 }

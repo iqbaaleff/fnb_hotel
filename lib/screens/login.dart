@@ -197,11 +197,7 @@ class _LoginState extends State<Login> {
                       child: Container(
                         width: size.width * 0.1,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFF48181), Color(0xFFED3838)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          color: Color(0xffE22323),
                           borderRadius: BorderRadius.circular(15),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 15),

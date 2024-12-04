@@ -85,7 +85,8 @@ class _AkunState extends State<Akun> {
         title: const Text(
           'Registrasi Akun Kasir',
           style: TextStyle(
-            color: Color(0xFF22E284),
+            color: Color(0xff0C085C),
+            fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.white,
@@ -96,7 +97,7 @@ class _AkunState extends State<Akun> {
               logout(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF22E284),
+              backgroundColor: Color(0xffE22323),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -123,7 +124,7 @@ class _AkunState extends State<Akun> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0), // Ketebalan garis
           child: Container(
-            color: Color(0xFF22E284), // Warna garis
+            color: Color(0xffE22323), // Warna garis
             height: 2.0, // Tinggi garis (ketebalan)
           ),
         ),
@@ -139,19 +140,18 @@ class _AkunState extends State<Akun> {
                 decoration: InputDecoration(
                   labelText: 'Username',
                   labelStyle: TextStyle(
-                    color: Color(0xFF22E284),
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xff0C085C),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 10,
@@ -166,22 +166,22 @@ class _AkunState extends State<Akun> {
                 height: 10,
               ),
               TextFormField(
+                
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(
-                    color: Color(0xFF22E284),
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xff0C085C),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 10,
@@ -200,19 +200,18 @@ class _AkunState extends State<Akun> {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(
-                    color: Color(0xFF22E284),
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xff0C085C),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 10,
@@ -230,19 +229,18 @@ class _AkunState extends State<Akun> {
                 decoration: InputDecoration(
                   labelText: 'No Hp',
                   labelStyle: TextStyle(
-                    color: Color(0xFF22E284),
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xff0C085C),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 10,
@@ -260,19 +258,18 @@ class _AkunState extends State<Akun> {
                 decoration: InputDecoration(
                   labelText: 'Role',
                   labelStyle: TextStyle(
-                    color: Color(0xFF22E284),
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xff0C085C),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Color(0xFF22E284), width: 3),
+                    borderSide: BorderSide(color: Color(0xffE22323), width: 2),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 10,
@@ -281,8 +278,7 @@ class _AkunState extends State<Akun> {
                 ),
                 dropdownColor: Colors.white, // Warna latar dropdown
                 style: TextStyle(
-                  color: Color(0xFF22E284), // Warna teks dalam dropdown
-                  fontWeight: FontWeight.bold,
+                  color: Color(0xffE22323), // Warna teks dalam dropdown
                 ),
                 items: ['kasir']
                     .map((role) => DropdownMenuItem(
@@ -294,19 +290,22 @@ class _AkunState extends State<Akun> {
                 validator: (value) =>
                     value == null ? 'Role wajib dipilih' : null,
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _register,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF22E284),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+              const SizedBox(height: 50),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 300),
+                child: ElevatedButton(
+                  onPressed: _register,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xffE22323),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Daftar',
-                  style: TextStyle(
-                    color: Colors.white,
+                  child: const Text(
+                    'Daftar',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

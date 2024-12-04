@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:fnb_hotel/services/logoutFunction.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -134,13 +135,45 @@ class _AddProductState extends State<AddProduct> {
       appBar: AppBar(
         title: const Text('Tambah Produk',
             style: TextStyle(
-              color: Color(0xFF22E284),
+              color: Color(0xff0C085C),
+              fontWeight: FontWeight.bold,
             )),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              // Panggil fungsi logout
+              logout(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xffE22323),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.logout_rounded,
+                  color: Colors.white,
+                ),
+                Text(
+                  "Logout",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 30,
+          ),
+        ],
         backgroundColor: Colors.white,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
           child: Container(
-            color: const Color(0xFF22E284),
+            color: const Color(0xffE22323),
             height: 2.0,
           ),
         ),
@@ -159,7 +192,26 @@ class _AddProductState extends State<AddProduct> {
                   controller: _judulController,
                   decoration: InputDecoration(
                     labelText: 'Judul Produk',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xff0C085C),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -176,7 +228,26 @@ class _AddProductState extends State<AddProduct> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Harga Awal',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xff0C085C),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -193,7 +264,26 @@ class _AddProductState extends State<AddProduct> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Harga Jual',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xff0C085C),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -210,7 +300,26 @@ class _AddProductState extends State<AddProduct> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Stok',
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(
+                      color: Color(0xff0C085C),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -224,6 +333,7 @@ class _AddProductState extends State<AddProduct> {
                 // Kategori Produk
                 DropdownButtonFormField<String>(
                   value: _kategoriProduk,
+
                   items: ['Makanan', 'Minuman', 'Cemilan']
                       .map((kategori) => DropdownMenuItem(
                             value: kategori,
@@ -236,8 +346,31 @@ class _AddProductState extends State<AddProduct> {
                     });
                   },
                   decoration: InputDecoration(
-                    labelText: 'Kategori Produk',
-                    border: OutlineInputBorder(),
+                    labelText: 'Role',
+                    labelStyle: TextStyle(
+                      color: Color(0xff0C085C),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323), width: 2),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                  ),
+                  dropdownColor: Colors.white, // Warna latar dropdown
+                  style: TextStyle(
+                    color: Color(0xff0C085C), // Warna teks dalam dropdown
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -245,8 +378,15 @@ class _AddProductState extends State<AddProduct> {
                 // Foto Produk
                 ElevatedButton(
                   onPressed: _pickImage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xffE22323),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                   child: Text(
                     _fotoProduk == null ? 'Pilih Foto' : 'Ganti Foto',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 if (_fotoProduk != null) Image.file(File(_fotoProduk!)),
@@ -254,9 +394,20 @@ class _AddProductState extends State<AddProduct> {
                 const SizedBox(height: 16),
 
                 // Tombol Submit
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text('Simpan Produk'),
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xffE22323),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: _submitForm,
+                    child: const Text(
+                      'Simpan Produk',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
               ],
             ),

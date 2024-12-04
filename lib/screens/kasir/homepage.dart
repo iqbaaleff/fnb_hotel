@@ -24,6 +24,7 @@ class _HomepageState extends State<Homepage> {
   String kasirName = '';
   double biayaLayanan = 3000;
   double subtotal = 0;
+  bool isNoteFilled = false;
 
   final TextEditingController aNamaController = TextEditingController();
   final TextEditingController totalHargaController = TextEditingController();
@@ -228,27 +229,73 @@ class _HomepageState extends State<Homepage> {
     final size = MediaQuery.of(context).size;
     final TextEditingController _noteController = TextEditingController();
 
+    setState(() {
+      isNoteFilled = true;
+    });
+
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Tambah Catatan untuk ${product.judulProduk}"),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: Color(0xffE22323),
+              width: 2,
+            ),
+          ),
+          title: Text(
+            "Tambah Catatan untuk ${product.judulProduk}",
+            style: TextStyle(
+              color: Color(0xff0C085C),
+            ),
+          ),
           content: TextField(
             controller: _noteController,
             decoration: InputDecoration(
-              labelText: "Masukkan catatan",
-              border: OutlineInputBorder(),
+              labelText: 'Masukan Catatan',
+              labelStyle: TextStyle(color: Color(0xff0C085C)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide:
+                    BorderSide(color: Color(0xffE22323)), // Border merah
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 5,
+              ),
             ),
             maxLines: 3,
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xffE22323),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Batal"),
+              child: Text(
+                "Batal",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xffE22323),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
               onPressed: () {
                 final note = _noteController.text.trim();
                 if (note.isNotEmpty) {
@@ -270,7 +317,10 @@ class _HomepageState extends State<Homepage> {
                   );
                 }
               },
-              child: Text("Simpan"),
+              child: Text("Simpan",
+                  style: TextStyle(
+                    color: Colors.white,
+                  )),
             ),
           ],
         );
@@ -1041,7 +1091,7 @@ class _HomepageState extends State<Homepage> {
                             size: size,
                             onProductSelected: onProductSelected,
                           ),
-                          Snack(
+                          Cemilan(
                             formatAngka: formatAngka,
                             size: size,
                             onProductSelected: onProductSelected,
@@ -1069,6 +1119,7 @@ class _HomepageState extends State<Homepage> {
                   // Callback saat catatan disimpan
                   print("Catatan disimpan: $note");
                 },
+                isNoteFilled: isNoteFilled,
               )
             ],
           ),

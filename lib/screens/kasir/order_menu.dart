@@ -12,6 +12,7 @@ class OrderMenu extends StatefulWidget {
   final Function(BuildContext, Product) popupCatatanOrder;
   final Function(double) formatAngka;
   final Function(String) onNoteSaved;
+  final bool isNoteFilled;
 
   const OrderMenu({
     Key? key,
@@ -24,6 +25,7 @@ class OrderMenu extends StatefulWidget {
     required this.formatAngka,
     required this.onNoteSaved,
     required this.popupCatatanOrder,
+    required this.isNoteFilled,
   }) : super(key: key);
 
   @override
@@ -126,17 +128,18 @@ class _OrderMenuState extends State<OrderMenu> {
                               bottom: widget.size.height * 0.015),
                           child: Dismissible(
                             key: Key(products.judulProduk.toString()),
-                            direction: DismissDirection.endToStart,
+                            direction: DismissDirection.startToEnd,
                             background: Container(
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(
-                                    0.8), // Warna latar belakang dengan transparansi
-                                borderRadius: BorderRadius.circular(
-                                    15), // Sesuaikan dengan container utama
+                                color: Color(0xffE22323),
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(15),
+                                  bottomRight: Radius.circular(15),
+                                ),
                               ),
-                              alignment: Alignment.centerRight,
+                              alignment: Alignment.centerLeft,
                               padding: EdgeInsets.only(
-                                  right: widget.size.width * 0.02),
+                                  left: widget.size.width * 0.01),
                               child: Icon(
                                 Icons.delete,
                                 color: Colors.white,
@@ -147,24 +150,56 @@ class _OrderMenuState extends State<OrderMenu> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Text("Hapus Produk"),
+                                    backgroundColor: Color(0xffE22323),
+                                    title: Text(
+                                      "Hapus Produk",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                     content: Text(
-                                        "Apakah Anda yakin ingin menghapus produk ini?"),
+                                      "Apakah Anda yakin ingin menghapus produk ini?",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                     actions: [
                                       TextButton(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "Batal",
+                                          style: TextStyle(
+                                            color: Color(0xffE22323),
+                                          ),
+                                        ),
                                         onPressed: () {
                                           Navigator.of(context).pop(false);
                                         },
-                                        child: Text("Batal"),
                                       ),
                                       TextButton(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "Hapus",
+                                          style: TextStyle(
+                                            color: Color(0xffE22323),
+                                          ),
+                                        ),
                                         onPressed: () {
                                           Navigator.of(context).pop(true);
                                         },
-                                        child: Text(
-                                          "Hapus",
-                                          style: TextStyle(color: Colors.red),
-                                        ),
                                       ),
                                     ],
                                   );
@@ -184,28 +219,32 @@ class _OrderMenuState extends State<OrderMenu> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey
+                                        .withOpacity(0.2), // Bayangan
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
                                 border: Border.all(
                                   color: Color(0xffE22323),
                                   width: 2,
                                 ),
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors
-                                    .white, // Pastikan warna dasar tetap terlihat
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(15),
+                                  bottomRight: Radius.circular(15),
+                                ),
+                                color: Colors.white,
                               ),
                               child: Row(
                                 children: [
                                   Expanded(
                                     flex: 0,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(15),
-                                        bottomLeft: Radius.circular(15),
-                                      ),
-                                      child: Container(
-                                        height: widget.size.height * 0.11,
-                                        width: widget.size.width * 0.01,
-                                        color: Color(0xffE22323),
-                                      ),
+                                    child: Container(
+                                      height: widget.size.height * 0.11,
+                                      width: widget.size.width * 0.01,
+                                      color: Color(0xffE22323),
                                     ),
                                   ),
                                   Expanded(
@@ -300,7 +339,10 @@ class _OrderMenuState extends State<OrderMenu> {
                                                   products); // Panggil fungsi dengan context dan produk.
                                             },
                                             icon: Icon(
-                                              Icons.note_add,
+                                              widget.isNoteFilled
+                                                  ? Icons.edit
+                                                  : Icons
+                                                      .note_add, // Ganti ikon sesuai kondisi
                                               color: Color(0xffE22323),
                                             ),
                                           ),
@@ -384,6 +426,7 @@ class _OrderMenuState extends State<OrderMenu> {
                                       style: TextStyle(
                                         color: Colors.white,
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
                                     actions: [
                                       Center(
