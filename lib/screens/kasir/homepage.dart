@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fnb_hotel/models/printerStruk.dart';
 import 'package:fnb_hotel/models/produk.dart';
 import 'package:fnb_hotel/screens/kasir/makanan.dart';
 import 'package:fnb_hotel/screens/kasir/minuman.dart';
@@ -22,7 +23,8 @@ class _HomepageState extends State<Homepage> {
   int selectedColor = 0;
   List<Product> selectedProducts = [];
   String kasirName = '';
-  double biayaLayanan = 3000;
+  double biayaLayanan = 0.10;
+  double ppn = 0.05;
   double subtotal = 0;
   bool isNoteFilled = false;
 
@@ -70,12 +72,24 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+  // Menghitung biaya layanan
+  double getBiayaLayanan(double totalHarga) {
+    return totalHarga * biayaLayanan; // 10% dari total harga
+  }
+
+// Menghitung PPN
+  double getPpn(double totalHarga) {
+    return totalHarga * ppn; // 5% dari total harga
+  }
+
 // Fungsi untuk menghitung subtotal harga dengan biaya layanan
   double subTotalHarga() {
     double totalHarga = selectedProducts.fold(0, (sum, product) {
       return sum + (product.hargaJual! * product.quantity);
     });
-    return totalHarga + biayaLayanan;
+    double biayaLayananHarga = getBiayaLayanan(totalHarga);
+    double ppnHarga = getPpn(totalHarga);
+    return totalHarga + biayaLayananHarga + ppnHarga;
   }
 
   @override
@@ -437,7 +451,19 @@ class _HomepageState extends State<Homepage> {
                                 children: [
                                   Text('Biaya Layanan:'),
                                   Text(
-                                      "Rp. ${biayaLayanan != null ? formatAngka(biayaLayanan.toDouble()) : 'Tidak ada harga'}"),
+                                    "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (10%)",
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('PPN:'),
+                                  Text(
+                                    "Rp. ${formatAngka(getPpn(totalHarga()))} (5%)",
+                                  ),
                                 ],
                               ),
                               Divider(thickness: 1, color: Colors.grey),
@@ -781,188 +807,230 @@ class _HomepageState extends State<Homepage> {
   void _popupBayarBerhasil(
       BuildContext context, double kembalian, double nominalBayar) {
     final size = MediaQuery.of(context).size;
+
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(
-                color: Color(0xffE22323),
-                width: 2,
-              ),
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: Color(0xffE22323),
+              width: 2,
             ),
-            content: Stack(
-              children: [
-                Container(
-                  width: size.width * 0.4,
-                  height: size.height * 0.6,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: size.width * 0.06,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset("assets/images/Subtract.png"),
-                        Text(
-                          'Pembayaran Berhasil !',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 30,
-                            color: Color(0xff0C085C),
-                            fontWeight: FontWeight.w700,
-                          ),
+          ),
+          content: Stack(
+            children: [
+              Container(
+                width: size.width * 0.4,
+                height: size.height * 0.6,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.width * 0.06,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset("assets/images/Subtract.png"),
+                      Text(
+                        'Pembayaran Berhasil !',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 30,
+                          color: Color(0xff0C085C),
+                          fontWeight: FontWeight.w700,
                         ),
-                        SizedBox(
-                          height: size.height * 0.1,
-                        ),
-                        Expanded(
-                          child: Container(
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Total Harga:'),
-                                    Text(
-                                        "Rp. ${totalHarga() != null ? formatAngka(totalHarga().toDouble()) : 'Tidak ada harga'}"),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Biaya Layanan:'),
-                                    Text(
-                                        "Rp. ${biayaLayanan != null ? formatAngka(biayaLayanan.toDouble()) : 'Tidak ada harga'}"),
-                                  ],
-                                ),
-                                Divider(thickness: 1, color: Colors.grey),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Subtotal:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      "Rp. ${subTotalHarga() != null ? formatAngka(subTotalHarga().toDouble()) : 'Tidak ada harga'}",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Jumlah Uang:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      "Rp. ${nominalBayar != null ? formatAngka(nominalBayar.toDouble()) : 'Tidak ada harga'}",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Kembalian:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      "Rp. ${kembalian != null ? formatAngka(kembalian.toDouble()) : 'Tidak ada harga'}",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: size.width * 0.03),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                      ),
+                      SizedBox(
+                        height: size.height * 0.1,
+                      ),
+                      Expanded(
+                        child: Container(
+                          child: Column(
                             children: [
-                              Container(
-                                width: size.width * 0.1,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Homepage()),
-                                      (Route<dynamic> route) =>
-                                          false, // Kondisi untuk menghapus semua rute sebelumnya
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xffE22323),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Total Harga:'),
+                                  Text(
+                                    "Rp. ${formatAngka(totalHarga().toDouble())}",
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.storefront_outlined,
-                                        color: Colors.white,
-                                      ),
-                                      Text(
-                                        "Home",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.white),
-                                      ),
-                                    ],
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Biaya Layanan:'),
+                                  Text(
+                                    "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (10%)",
                                   ),
-                                ),
+                                ],
                               ),
-                              SizedBox(
-                                width: 10,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('PPN:'),
+                                  Text(
+                                    "Rp. ${formatAngka(getPpn(totalHarga()))} (5%)",
+                                  ),
+                                ],
                               ),
-                              ElevatedButton(
-                                onPressed: () {},
+                              Divider(thickness: 1, color: Colors.grey),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Subtotal:',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Rp. ${formatAngka(subTotalHarga().toDouble())}",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Jumlah Uang:',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Rp. ${formatAngka(nominalBayar.toDouble())}",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Kembalian:',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Rp. ${formatAngka(kembalian.toDouble())}",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: size.width * 0.03),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: size.width * 0.1,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Homepage()),
+                                    (Route<dynamic> route) => false,
+                                  );
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Color(0xffE22323),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                 ),
-                                child: Icon(
-                                  Icons.print,
-                                  color: Colors.white,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.storefront_outlined,
+                                      color: Colors.white,
+                                    ),
+                                    Text(
+                                      "Home",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                PdfGenerator.printInvoice(
+                                  namaHotel: "Hotel Mewah",
+                                  alamat: "Jl. Contoh Alamat No. 123, Jakarta",
+                                  tanggalTransaksi: DateTime.now()
+                                      .toString()
+                                      .split(' ')[0], // Format YYYY-MM-DD
+                                  atasNama: aNamaController.text.trim(),
+                                  detailPesanan:
+                                      selectedProducts.map((product) {
+                                    return {
+                                      "item": product.judulProduk,
+                                      "harga": product.hargaJual,
+                                      "jumlah": product.quantity,
+                                      "note": product
+                                          .note, // Pastikan produk memiliki field 'note'
+                                    };
+                                  }).toList(),
+                                  total: totalHarga(),
+                                  getBiayaLayanan: (total) =>
+                                      total * 0.10, // Fungsi untuk layanan 10%
+                                  getPpn: (total) =>
+                                      total * 0.05, // Fungsi untuk PPN 5%
+                                  subtotal: subTotalHarga(),
+                                  catatan: selectedProducts
+                                      .map((product) => product.note)
+                                      .join(
+                                          ", "), // Menggabungkan catatan dari semua produk
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xffE22323),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.print,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          );
-        });
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override

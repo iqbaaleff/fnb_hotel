@@ -34,7 +34,7 @@ class Product {
         hargaJual: json['hargaJual'] ?? 0,
         stok: json['stok'] ?? 0,
         quantity: 1,
-        note: json['tambahan'] ?? "Original tanpa catatan");
+        note: json['tambahan'] ?? "Polosan");
   }
 }
 
