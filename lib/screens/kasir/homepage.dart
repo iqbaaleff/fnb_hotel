@@ -988,7 +988,7 @@ class _HomepageState extends State<Homepage> {
                             size: size,
                             onProductSelected: onProductSelected,
                           ),
-                          Snack(
+                          Cemilan(
                             formatAngka: formatAngka,
                             size: size,
                             onProductSelected: onProductSelected,

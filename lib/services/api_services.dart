@@ -86,7 +86,7 @@ class ApiService {
   }
 
   /// API
-  Future<List<Product>> getProductsSnack() async {
+  Future<List<Product>> getProductsCemilan() async {
     const String url =
         'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/Cemilan';
 

@@ -20,13 +20,24 @@ class Minuman extends StatefulWidget {
 }
 
 class _MinumanState extends State<Minuman> {
-  Future<List<Product>>? _product;
+  Future<List<Product>>? _productFuture;
+  List<Product> _filteredProducts = [];
+  List<Product> _allProducts = [];
+  TextEditingController _searchController = TextEditingController();
   String? _token;
 
   @override
   void initState() {
     super.initState();
-    _loadToken(); // Ambil token saat widget diinisialisasi
+    _productFuture = ApiService().getProductsMinuman();
+    _productFuture!.then((products) {
+      setState(() {
+        _allProducts = products;
+        _filteredProducts = products; // Initially, no filtering
+      });
+    });
+    _searchController.addListener(_onSearchChanged);
+    _loadToken();
   }
 
   Future<void> _loadToken() async {
@@ -37,7 +48,17 @@ class _MinumanState extends State<Minuman> {
       if (token != null) {
         setState(() {
           _token = token;
-          _product = ApiService().getProductsMinuman();
+          _productFuture = ApiService().getProductsMinuman();
+          _productFuture!.then((products) {
+            setState(() {
+              _allProducts = products;
+              _filteredProducts = products;
+            });
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Gagal memuat produk: $error')),
+            );
+          });
         });
       } else {
         if (mounted) {
@@ -57,6 +78,28 @@ class _MinumanState extends State<Minuman> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      // Filter products based on search query
+      if (_searchController.text.isEmpty) {
+        _filteredProducts = _allProducts;
+      } else {
+        _filteredProducts = _allProducts.where((product) {
+          return product.judulProduk
+                  ?.toLowerCase()
+                  .contains(_searchController.text.toLowerCase()) ??
+              false;
+        }).toList();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Expanded(
       flex: 8,
@@ -67,9 +110,40 @@ class _MinumanState extends State<Minuman> {
           padding: EdgeInsets.symmetric(horizontal: widget.size.width * 0.005),
           child: Column(
             children: [
+              // Search Bar
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: widget.size.width * 0.12,
+                    vertical: widget.size.height * 0.01),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Cari Produk...',
+                    suffixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: Color(0xffE22323)), // Border merah
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                          color: Color(0xffE22323),
+                          width: 2), // Border merah saat fokus
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: FutureBuilder<List<Product>>(
-                  future: _product,
+                  future: _productFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -79,8 +153,6 @@ class _MinumanState extends State<Minuman> {
                       return const Center(child: Text('No products available'));
                     }
 
-                    final products = snapshot.data;
-
                     return GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -89,15 +161,15 @@ class _MinumanState extends State<Minuman> {
                         crossAxisCount: 5,
                         childAspectRatio: 0.85,
                       ),
-                      itemCount: products!.length,
+                      itemCount: _filteredProducts.length,
                       itemBuilder: (context, index) {
-                        final product = products[index];final isOutOfStock =
+                        final product = _filteredProducts[index];
+                        final isOutOfStock =
                             product.stok == null || product.stok! <= 0;
                         return GestureDetector(
                           onTap: () {
                             if (!isOutOfStock) {
-                              widget.onProductSelected(
-                                  product); // Produk bisa dipilih
+                              widget.onProductSelected(product);
                             } else {
                               showDialog(
                                 context: context,
@@ -128,8 +200,7 @@ class _MinumanState extends State<Minuman> {
                                             ),
                                           ),
                                           onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Menutup pop-up
+                                            Navigator.of(context).pop();
                                           },
                                         ),
                                       ),
@@ -140,17 +211,12 @@ class _MinumanState extends State<Minuman> {
                             }
                           },
                           child: Opacity(
-                            opacity: isOutOfStock
-                                ? 0.5
-                                : 1.0, // Turunkan opacity jika stok habis
+                            opacity: isOutOfStock ? 0.5 : 1.0,
                             child: Card(
                               color: isOutOfStock
                                   ? Colors.grey[300]
-                                  : Colors
-                                      .white, // Warna abu-abu untuk stok habis
-                              elevation: isOutOfStock
-                                  ? 1
-                                  : 2, // Kurangi elevasi untuk stok habis
+                                  : Colors.white,
+                              elevation: isOutOfStock ? 1 : 2,
                               child: Column(
                                 children: [
                                   Expanded(
