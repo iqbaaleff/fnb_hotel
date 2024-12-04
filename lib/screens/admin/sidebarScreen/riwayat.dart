@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:fnb_hotel/services/logoutFunction.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart'; // Import intl untuk format tanggal
 
 class Riwayat extends StatefulWidget {
   @override
@@ -20,22 +21,16 @@ class _RiwayatState extends State<Riwayat> {
     });
   }
 
-  // Fungsi untuk mengecek token
-  void cekToken() {
-    if (token != null && token!.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Token ditemukan: $token'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Token tidak ditemukan!'),
-          backgroundColor: Colors.red,
-        ),
-      );
+  // Fungsi untuk format tanggal
+  String formatDate(String? date) {
+    if (date == null || date.isEmpty) return '-';
+    try {
+      DateTime parsedDate = DateTime.parse(date);
+      return DateFormat('yyyy-MM-dd')
+          .format(parsedDate); // Format hanya tanggal
+    } catch (e) {
+      print('Error parsing date: $e');
+      return '-';
     }
   }
 
@@ -51,10 +46,6 @@ class _RiwayatState extends State<Riwayat> {
         'https://74gslzvj-3000.asse.devtunnels.ms/api/transaksiOrder',
       );
 
-      // Debugging untuk melihat status code dan data respons
-      print("Response Status Code: ${response.statusCode}");
-      print("Response Data: ${response.data}");
-
       if (response.statusCode == 200) {
         setState(() {
           transaksiList = response.data;
@@ -67,42 +58,6 @@ class _RiwayatState extends State<Riwayat> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // Fungsi untuk menghapus transaksi berdasarkan id
-  Future<void> hapusTransaksi(int id) async {
-    try {
-      var dio = Dio();
-
-      // Menambahkan token ke header jika token tersedia
-      dio.options.headers['Authorization'] = 'Bearer $token';
-
-      var response = await dio.delete(
-        'https://74gslzvj-3000.asse.devtunnels.ms/api/deleteHistory/$id',
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          transaksiList.removeWhere((transaksi) => transaksi['id'] == id);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Transaksi berhasil dihapus'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        throw Exception('Gagal menghapus transaksi');
-      }
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menghapus transaksi: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -185,69 +140,76 @@ class _RiwayatState extends State<Riwayat> {
                 child:
                     CircularProgressIndicator(), // Tampilkan loader saat data masih kosong
               )
-            : Center(
+            : SingleChildScrollView(
+                scrollDirection:
+                    Axis.vertical, // Agar tabel bisa digulir vertikal
                 child: SingleChildScrollView(
-                  scrollDirection: Axis
-                      .vertical, // Agar tabel bisa digulir secara horizontal
-                  child: transaksiList.isNotEmpty
-                      ? DataTable(
-                          dataRowColor: MaterialStateColor.resolveWith(
-                              (states) => Colors.grey[200]!),
-                          headingRowColor: MaterialStateColor.resolveWith(
-                              (states) => const Color(0xFF22E284)),
-                          columns: [
-                            DataColumn(label: Text('Order No')),
-                            DataColumn(label: Text('Nama Pemesan')),
-                            DataColumn(label: Text('Kasir')),
-                            DataColumn(label: Text('Total Harga')),
-                            DataColumn(label: Text('Biaya Layanan')),
-                            DataColumn(label: Text('Subtotal')),
-                            DataColumn(label: Text('Aksi')), // Kolom aksi
-                          ],
-                          rows: transaksiList.map((transaksi) {
-                            return DataRow(cells: [
-                              DataCell(Text(transaksi['order_id'] ?? '-')),
-                              DataCell(Text(transaksi['atasNama'] ?? '-')),
-                              DataCell(Text(transaksi['kasirName'] ?? '-')),
-                              DataCell(Text('Rp ${transaksi['total']}')),
-                              DataCell(Text('Rp ${transaksi['biayaLayanan']}')),
-                              DataCell(Text('Rp ${transaksi['subTotal']}')),
-                              // Kolom aksi dengan tombol hapus
-                              DataCell(
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    // Menanyakan konfirmasi sebelum menghapus
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text('Konfirmasi Hapus'),
-                                        content: Text(
-                                            'Apakah Anda yakin ingin menghapus transaksi ini?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text('Batal'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              hapusTransaksi(transaksi['id']);
-                                            },
-                                            child: Text('Hapus'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                  scrollDirection:
+                      Axis.horizontal, // Agar tabel bisa digulir horizontal
+                  child: DataTable(
+                    dataRowColor: MaterialStateColor.resolveWith(
+                        (states) => Colors.grey[200]!),
+                    headingRowColor: MaterialStateColor.resolveWith(
+                        (states) => const Color(0xFF22E284)),
+                    columns: [
+                      DataColumn(label: Text('Order No')),
+                      DataColumn(label: Text('Tanggal')),
+                      DataColumn(label: Text('Atas Nama')),
+                      DataColumn(label: Text('Kasir')),
+                      DataColumn(label: Text('Catatan')),
+                      DataColumn(label: Text('Layanan 10%')),
+                      DataColumn(label: Text('PPN 5%')),
+                      DataColumn(label: Text('Total')),
+                      DataColumn(label: Text('Subtotal')),
+                      DataColumn(label: Text('Aksi')), // Kolom aksi
+                    ],
+                    rows: transaksiList.map((transaksi) {
+                      return DataRow(cells: [
+                        DataCell(Text((transaksiList.indexOf(transaksi) + 1)
+                            .toString())), // Mulai dari 1
+                        DataCell(Text(formatDate(
+                            transaksi['createdAt']))), // Format tanggal
+                        DataCell(Text(transaksi['nama'] ?? '-')),
+                        DataCell(Text(transaksi['namaKasir'] ?? '-')),
+                        DataCell(Text(transaksi['tambahan'] ?? '-')),
+                        DataCell(Text('Rp ${transaksi['ppn'] ?? '0'}')),
+                        DataCell(Text('Rp ${transaksi['layanan'] ?? '0'}')),
+                        DataCell(Text('Rp ${transaksi['total'] ?? '0'}')),
+                        DataCell(Text('Rp ${transaksi['subTotal'] ?? '0'}')),
+                        DataCell(
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              // Menanyakan konfirmasi sebelum menghapus
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text('Konfirmasi Hapus'),
+                                  content: Text(
+                                      'Apakah Anda yakin ingin menghapus transaksi ini?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Batal'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        // Panggil hapus transaksi
+                                      },
+                                      child: Text('Hapus'),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ]);
-                          }).toList(),
-                        )
-                      : Center(child: Text('Tidak ada transaksi tersedia')),
+                              );
+                            },
+                          ),
+                        ),
+                      ]);
+                    }).toList(),
+                  ),
                 ),
               ),
       ),

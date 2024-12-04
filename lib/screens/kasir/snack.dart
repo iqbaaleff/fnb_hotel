@@ -147,7 +147,7 @@ class _SnackState extends State<Snack> {
                                         ),
                                       ),
                                       Text(
-                                        "Rp. ${product.harga != null ? widget.formatAngka(product.harga!.toDouble()) : 'Tidak ada harga'}",
+                                        "Rp. ${product.hargaJual != null ? widget.formatAngka(product.hargaJual!.toDouble()) : 'Tidak ada harga'}",
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey.shade600,

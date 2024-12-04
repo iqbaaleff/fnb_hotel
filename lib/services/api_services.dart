@@ -20,7 +20,7 @@ class ApiService {
   /// API Cemilan
   Future<List<Product>> getProductsMakanan() async {
     const String url =
-        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/cemilan';
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/Makanan';
 
     try {
       final token = await getToken();
@@ -54,7 +54,7 @@ class ApiService {
   /// API Coffe
   Future<List<Product>> getProductsMinuman() async {
     const String url =
-        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/coffe';
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/Minuman';
 
     try {
       final token = await getToken();
@@ -84,10 +84,11 @@ class ApiService {
       throw Exception('Gagal memuat produk coffee: $e');
     }
   }
-  /// API 
+
+  /// API
   Future<List<Product>> getProductsSnack() async {
     const String url =
-        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk';
+        'https://74gslzvj-3000.asse.devtunnels.ms/api/produk/Cemilan';
 
     try {
       final token = await getToken();
