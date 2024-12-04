@@ -24,6 +24,7 @@ class _HomepageState extends State<Homepage> {
   String kasirName = '';
   double biayaLayanan = 3000;
   double subtotal = 0;
+  bool isNoteFilled = false;
 
   final TextEditingController aNamaController = TextEditingController();
   final TextEditingController totalHargaController = TextEditingController();
@@ -65,14 +66,14 @@ class _HomepageState extends State<Homepage> {
 // Fungsi untuk menghitung total harga
   double totalHarga() {
     return selectedProducts.fold(0, (sum, product) {
-      return sum + (product.harga! * product.quantity);
+      return sum + (product.hargaJual! * product.quantity);
     });
   }
 
 // Fungsi untuk menghitung subtotal harga dengan biaya layanan
   double subTotalHarga() {
     double totalHarga = selectedProducts.fold(0, (sum, product) {
-      return sum + (product.harga! * product.quantity);
+      return sum + (product.hargaJual! * product.quantity);
     });
     return totalHarga + biayaLayanan;
   }
@@ -123,8 +124,7 @@ class _HomepageState extends State<Homepage> {
     try {
       // Pastikan getUserData() dipanggil sebelum kirimTransaksi
       await getUserData();
-      print(
-          "Kasir Name after getUserData: $kasirName"); // Log untuk melihat nilai kasirName
+      print("Kasir Name after getUserData: $kasirName");
 
       // Cek apakah data kasir atau atas nama sudah diisi
       if (kasirName.isEmpty || aNamaController.text.isEmpty) {
@@ -142,11 +142,12 @@ class _HomepageState extends State<Homepage> {
         return {
           "id_produk": product.id,
           "jumlah": product.quantity,
-          "subTotal": product.harga! * product.quantity,
+          "subTotal": product.hargaJual! * product.quantity,
+          "tambahan": product.note ?? "", // Catatan pengguna, default kosong
         };
       }).toList();
 
-      print("Produk yang dikirim ke backend: $produkData"); // Log data produk
+      print("Produk yang dikirim ke backend: $produkData");
 
       // Ambil token jika diperlukan untuk autentikasi
       String? token = await getToken();
@@ -212,17 +213,119 @@ class _HomepageState extends State<Homepage> {
           id: product.id,
           judulProduk: product.judulProduk,
           fotoProduk: product.fotoProduk,
-          harga: product.harga,
           kategoriProduk: product.kategoriProduk,
           subKategoriProduk: product.subKategoriProduk,
           hargaAwal: product.hargaAwal,
           hargaJual: product.hargaJual,
           stok: product.stok,
-          quantity: 1, // Memastikan quantity dimulai dari 1
+          quantity: 1, note: product.note, // Memastikan quantity dimulai dari 1
         ));
       }
     });
     print("Selected Products: ${selectedProducts}"); // Log produk yang dipilih
+  }
+
+  void popupCatatanOrder(BuildContext context, Product product) {
+    final size = MediaQuery.of(context).size;
+    final TextEditingController _noteController = TextEditingController();
+
+    setState(() {
+      isNoteFilled = true;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: Color(0xffE22323),
+              width: 2,
+            ),
+          ),
+          title: Text(
+            "Tambah Catatan untuk ${product.judulProduk}",
+            style: TextStyle(
+              color: Color(0xff0C085C),
+            ),
+          ),
+          content: TextField(
+            controller: _noteController,
+            decoration: InputDecoration(
+              labelText: 'Masukan Catatan',
+              labelStyle: TextStyle(color: Color(0xff0C085C)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide:
+                    BorderSide(color: Color(0xffE22323)), // Border merah
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 5,
+              ),
+            ),
+            maxLines: 3,
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xffE22323),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "Batal",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xffE22323),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: () {
+                final note = _noteController.text.trim();
+                if (note.isNotEmpty) {
+                  // Perbarui catatan produk
+                  setState(() {
+                    int index =
+                        selectedProducts.indexWhere((p) => p.id == product.id);
+                    if (index != -1) {
+                      selectedProducts[index].note = note; // Simpan catatan
+                    }
+                  });
+                  Navigator.of(context).pop(); // Tutup popup
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Catatan tidak boleh kosong"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: Text("Simpan",
+                  style: TextStyle(
+                    color: Colors.white,
+                  )),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // pop-up konfirmasi pembayaran
@@ -1002,14 +1105,22 @@ class _HomepageState extends State<Homepage> {
 
               // Order Menu
               OrderMenu(
-                formatAngka: formatAngka,
-                selectedProducts: selectedProducts,
-                size: size,
-                totalHarga: totalHarga,
-                popupKonfirBayar: popupKonfirBayar,
-                kurang: kurang,
-                tambah: tambah,
-              ),
+                formatAngka: formatAngka, // Fungsi untuk memformat angka
+                selectedProducts: selectedProducts, // List produk yang dipilih
+                size: MediaQuery.of(context).size, // Ukuran layar
+                totalHarga: totalHarga, // Fungsi untuk menghitung total harga
+                popupKonfirBayar:
+                    popupKonfirBayar, // Fungsi untuk popup konfirmasi bayar
+                popupCatatanOrder:
+                    popupCatatanOrder, // Fungsi untuk popup catatan
+                kurang: kurang, // Fungsi untuk mengurangi jumlah produk
+                tambah: tambah, // Fungsi untuk menambah jumlah produk
+                onNoteSaved: (note) {
+                  // Callback saat catatan disimpan
+                  print("Catatan disimpan: $note");
+                },
+                isNoteFilled: isNoteFilled,
+              )
             ],
           ),
         ),

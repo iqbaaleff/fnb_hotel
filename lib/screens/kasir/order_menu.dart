@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fnb_hotel/models/produk.dart';
 import 'package:fnb_hotel/services/logoutFunction.dart';
 
 class OrderMenu extends StatefulWidget {
@@ -8,7 +9,10 @@ class OrderMenu extends StatefulWidget {
   final Function tambah;
   final Function totalHarga;
   final Function(BuildContext) popupKonfirBayar;
+  final Function(BuildContext, Product) popupCatatanOrder;
   final Function(double) formatAngka;
+  final Function(String) onNoteSaved;
+  final bool isNoteFilled;
 
   const OrderMenu({
     Key? key,
@@ -19,6 +23,9 @@ class OrderMenu extends StatefulWidget {
     required this.totalHarga,
     required this.popupKonfirBayar,
     required this.formatAngka,
+    required this.onNoteSaved,
+    required this.popupCatatanOrder,
+    required this.isNoteFilled,
   }) : super(key: key);
 
   @override
@@ -119,136 +126,232 @@ class _OrderMenuState extends State<OrderMenu> {
                         return Padding(
                           padding: EdgeInsets.only(
                               bottom: widget.size.height * 0.015),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
+                          child: Dismissible(
+                            key: Key(products.judulProduk.toString()),
+                            direction: DismissDirection.startToEnd,
+                            background: Container(
+                              decoration: BoxDecoration(
                                 color: Color(0xffE22323),
-                                width: 2,
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(15),
+                                  bottomRight: Radius.circular(15),
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(15),
+                              alignment: Alignment.centerLeft,
+                              padding: EdgeInsets.only(
+                                  left: widget.size.width * 0.01),
+                              child: Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
                             ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 0,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      bottomLeft: Radius.circular(15),
+                            confirmDismiss: (direction) async {
+                              bool? result = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor: Color(0xffE22323),
+                                    title: Text(
+                                      "Hapus Produk",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
                                     ),
+                                    content: Text(
+                                      "Apakah Anda yakin ingin menghapus produk ini?",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "Batal",
+                                          style: TextStyle(
+                                            color: Color(0xffE22323),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop(false);
+                                        },
+                                      ),
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "Hapus",
+                                          style: TextStyle(
+                                            color: Color(0xffE22323),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop(true);
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                              return result ?? false;
+                            },
+                            onDismissed: (direction) {
+                              setState(() {
+                                widget.selectedProducts.removeAt(index);
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Produk berhasil dihapus"),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey
+                                        .withOpacity(0.2), // Bayangan
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: Color(0xffE22323),
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(15),
+                                  bottomRight: Radius.circular(15),
+                                ),
+                                color: Colors.white,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 0,
                                     child: Container(
                                       height: widget.size.height * 0.11,
                                       width: widget.size.width * 0.01,
                                       color: Color(0xffE22323),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Container(
-                                    child: Row(
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: widget.size.width * 0.01),
-                                          child: products.fotoProduk != null &&
-                                                  products
-                                                      .fotoProduk!.isNotEmpty
-                                              ? Image.network(
-                                                  'https://74gslzvj-3000.asse.devtunnels.ms${products.fotoProduk!}',
-                                                  fit: BoxFit.contain,
-                                                  width:
-                                                      widget.size.width * 0.05,
-                                                  height:
-                                                      widget.size.height * 0.11,
-                                                )
-                                              : Icon(
-                                                  Icons.image_not_supported,
-                                                  size: 100,
-                                                  color: Colors.grey[400],
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                left: widget.size.width * 0.01),
+                                            child: products.fotoProduk !=
+                                                        null &&
+                                                    products
+                                                        .fotoProduk!.isNotEmpty
+                                                ? Image.network(
+                                                    'https://74gslzvj-3000.asse.devtunnels.ms${products.fotoProduk!}',
+                                                    fit: BoxFit.contain,
+                                                    width: widget.size.width *
+                                                        0.05,
+                                                    height: widget.size.height *
+                                                        0.11,
+                                                  )
+                                                : Icon(
+                                                    Icons.image_not_supported,
+                                                    size: 100,
+                                                    color: Colors.grey[400],
+                                                  ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                products.judulProduk,
+                                                style: TextStyle(
+                                                  color: Color(0xff0C085C),
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w700,
                                                 ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 3,
-                                  child: Container(
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              products.judulProduk,
-                                              style: TextStyle(
-                                                color: Color(0xff0C085C),
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w700,
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "Rp. ${products.harga != null ? widget.formatAngka(products.harga!.toDouble()) : 'Tidak ada harga'}",
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey.shade600,
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "Rp. ${products.hargaJual != null ? widget.formatAngka(products.hargaJual!.toDouble()) : 'Tidak ada harga'}",
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey.shade600,
+                                                ),
                                               ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            onPressed: () {
+                                              widget.kurang(products);
+                                            },
+                                            icon: Icon(
+                                              Icons.remove_circle,
+                                              color: Color(0xffE22323),
                                             ),
-                                          ],
-                                        ),
-                                      ],
+                                          ),
+                                          Text(products.quantity.toString()),
+                                          IconButton(
+                                            onPressed: () {
+                                              widget.tambah(products);
+                                            },
+                                            icon: Icon(
+                                              Icons.add_circle,
+                                              color: Color(0xffE22323),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () {
+                                              widget.popupCatatanOrder(context,
+                                                  products); // Panggil fungsi dengan context dan produk.
+                                            },
+                                            icon: Icon(
+                                              widget.isNoteFilled
+                                                  ? Icons.edit
+                                                  : Icons
+                                                      .note_add, // Ganti ikon sesuai kondisi
+                                              color: Color(0xffE22323),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 3,
-                                  child: Container(
-                                    child: Row(
-                                      children: [
-                                        // -
-                                        IconButton(
-                                          onPressed: () {
-                                            widget.kurang(products);
-                                          },
-                                          icon: Icon(
-                                            Icons.remove_circle,
-                                            color: Color(0xffE22323),
-                                          ),
-                                        ),
-                                        // angka
-                                        Text(products.quantity.toString()),
-                                        // +
-                                        IconButton(
-                                          onPressed: () {
-                                            widget.tambah(products);
-                                          },
-                                          icon: Icon(
-                                            Icons.add_circle,
-                                            color: Color(0xffE22323),
-                                          ),
-                                        ),
-                                        // Tombol hapus
-                                        IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              widget.selectedProducts
-                                                  .removeAt(index);
-                                            });
-                                          },
-                                          icon: Icon(
-                                            Icons.delete,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );

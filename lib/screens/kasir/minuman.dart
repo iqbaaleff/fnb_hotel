@@ -128,12 +128,6 @@ class _MinumanState extends State<Minuman> {
                       borderSide:
                           BorderSide(color: Color(0xffE22323)), // Border merah
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                          color: Color(0xffE22323),
-                          width: 2), // Border merah saat fokus
-                    ),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 5,
@@ -269,7 +263,7 @@ class _MinumanState extends State<Minuman> {
                                           ),
                                         ),
                                         Text(
-                                          "Rp. ${product.harga != null ? widget.formatAngka(product.harga!.toDouble()) : 'Tidak ada harga'}",
+                                          "Rp. ${product.hargaJual != null ? widget.formatAngka(product.hargaJual!.toDouble()) : 'Tidak ada harga'}",
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: isOutOfStock

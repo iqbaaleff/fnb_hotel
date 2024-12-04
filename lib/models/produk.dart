@@ -2,40 +2,39 @@ class Product {
   final num? id;
   final String judulProduk;
   final String? fotoProduk;
-  final num? harga;
   final String? kategoriProduk;
   final String? subKategoriProduk;
   final num? hargaAwal;
   final num? hargaJual;
   final num? stok;
+  String? note; // Catatan bisa diubah
   int quantity;
 
   Product({
     required this.id,
     required this.judulProduk,
     required this.fotoProduk,
-    required this.harga,
     required this.kategoriProduk,
     required this.subKategoriProduk,
     required this.hargaAwal,
     required this.hargaJual,
     required this.stok,
     this.quantity = 1,
+    this.note,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'] as int?,
-      judulProduk: json['judul_produk'] ?? 'Tanpa Judul',
-      fotoProduk: json['foto_produk'],
-      harga: json['harga'] ?? 0,
-      kategoriProduk: json['kategori_produk'] ?? 'Tanpa Kategori',
-      subKategoriProduk: json['sub_kategori_produk'] ?? 'Tanpa Sub Kategori',
-      hargaAwal: json['hargaAwal'] ?? 0,
-      hargaJual: json['hargaJual'] ?? 0,
-      stok: json['stok'] ?? 0,
-      quantity: 1,
-    );
+        id: json['id'] as int?,
+        judulProduk: json['judul_produk'] ?? 'Tanpa Judul',
+        fotoProduk: json['foto_produk'],
+        kategoriProduk: json['kategori_produk'] ?? 'Tanpa Kategori',
+        subKategoriProduk: json['sub_kategori_produk'] ?? 'Tanpa Sub Kategori',
+        hargaAwal: json['hargaAwal'] ?? 0,
+        hargaJual: json['hargaJual'] ?? 0,
+        stok: json['stok'] ?? 0,
+        quantity: 1,
+        note: json['tambahan'] ?? "Original tanpa catatan");
   }
 }
 

@@ -116,6 +116,7 @@ class _MakananState extends State<Makanan> {
                     horizontal: widget.size.width * 0.12,
                     vertical: widget.size.height * 0.01),
                 child: TextField(
+                  enabled: true,
                   controller: _searchController,
                   decoration: InputDecoration(
                     hintText: 'Cari Produk...',
@@ -128,12 +129,7 @@ class _MakananState extends State<Makanan> {
                       borderSide:
                           BorderSide(color: Color(0xffE22323)), // Border merah
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                          color: Color(0xffE22323),
-                          width: 2), // Border merah saat fokus
-                    ),
+                    
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 5,
@@ -201,6 +197,8 @@ class _MakananState extends State<Makanan> {
                                           ),
                                           onPressed: () {
                                             Navigator.of(context).pop();
+                                            FocusScope.of(context)
+                                                .unfocus(); // Menghapus fokus
                                           },
                                         ),
                                       ),
@@ -269,7 +267,7 @@ class _MakananState extends State<Makanan> {
                                           ),
                                         ),
                                         Text(
-                                          "Rp. ${product.harga != null ? widget.formatAngka(product.harga!.toDouble()) : 'Tidak ada harga'}",
+                                          "Rp. ${product.hargaJual != null ? widget.formatAngka(product.hargaJual!.toDouble()) : 'Tidak ada harga'}",
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: isOutOfStock

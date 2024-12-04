@@ -62,7 +62,7 @@ class _SidebarAdminState extends State<SidebarAdmin> {
           // Sidebar
           Container(
             width: size.width * 0.1,
-            color: Color(0xFF22E284),
+            color: Color(0xffE22323),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(_titles.length, (index) {
@@ -90,7 +90,7 @@ class _SidebarAdminState extends State<SidebarAdmin> {
                       children: [
                         Icon(
                           _icons[index],
-                          color: isSelected ? Color(0xFF22E284) : Colors.white,
+                          color: isSelected ? Color(0xffE22323) : Colors.white,
                           size: 28,
                         ),
                         const SizedBox(width: 4),
@@ -98,7 +98,7 @@ class _SidebarAdminState extends State<SidebarAdmin> {
                           Text(
                             _titles[index],
                             style: const TextStyle(
-                              color: Color(0xFF22E284),
+                              color: Color(0xffE22323),
                               fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
