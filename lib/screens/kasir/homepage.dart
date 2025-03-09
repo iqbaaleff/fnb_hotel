@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fnb_hotel/models/printerStruk.dart';
+import 'package:fnb_hotel/models/printerStrukKitchen.dart';
 import 'package:fnb_hotel/models/produk.dart';
 import 'package:fnb_hotel/screens/kasir/makanan.dart';
 import 'package:fnb_hotel/screens/kasir/minuman.dart';
@@ -1011,6 +1012,33 @@ class _HomepageState extends State<Homepage> {
     color: Colors.white,
   ),
 ),
+SizedBox(width: 10,),
+ElevatedButton(
+  onPressed: () {
+    KitchenReceipt.printKitchenReceipt(
+      atasNama: aNamaController.text.trim(),
+      detailPesanan: selectedProducts.map((product) {
+        return {
+          "item": product.judulProduk,
+          "jumlah": product.quantity,
+          "note": product.note ?? '-', // Pastikan tidak null
+        };
+      }).toList(), logoPath:  "assets/images/logo.png",
+    );
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Color(0xffE22323), // Warna merah sesuai logo hotel
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+    ),
+  ),
+  child: Icon(
+    Icons.kitchen,
+    color: Colors.white,
+  ),
+),
+
+
 
                           ],
                         ),
