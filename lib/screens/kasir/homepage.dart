@@ -202,7 +202,17 @@ class _HomepageState extends State<Homepage> {
 // Fungsi untuk menambahkan quantity produk
   void tambah(Product product) {
     setState(() {
-      product.quantity++;
+      if (product.quantity < (product.stok ?? 0)) {
+        product.quantity++;
+      } else {
+        // Tampilkan pesan bahwa stok tidak mencukupi
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Stok tidak mencukupi!"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     });
   }
 
@@ -220,8 +230,18 @@ class _HomepageState extends State<Homepage> {
     setState(() {
       int index = selectedProducts.indexWhere((p) => p.id == product.id);
       if (index != -1) {
-        // Jika produk sudah ada, tambah quantity-nya
-        selectedProducts[index].quantity++;
+        // Jika produk sudah ada, tambah quantity-nya jika stok mencukupi
+        if (selectedProducts[index].quantity < (product.stok ?? 0)) {
+          selectedProducts[index].quantity++;
+        } else {
+          // Tampilkan pesan bahwa stok tidak mencukupi
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Stok tidak mencukupi!"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } else {
         // Jika produk belum ada, tambahkan produk dengan quantity 1
         selectedProducts.add(Product(
@@ -233,7 +253,8 @@ class _HomepageState extends State<Homepage> {
           hargaAwal: product.hargaAwal,
           hargaJual: product.hargaJual,
           stok: product.stok,
-          quantity: 1, note: product.note, // Memastikan quantity dimulai dari 1
+          quantity: 1, // Memastikan quantity dimulai dari 1
+          note: product.note,
         ));
       }
     });
@@ -979,67 +1000,75 @@ class _HomepageState extends State<Homepage> {
                               width: 10,
                             ),
                             ElevatedButton(
-  onPressed: () {
-    double subtotal = subTotalHarga();
+                              onPressed: () {
+                                double subtotal = subTotalHarga();
 
-    PdfGenerator.printInvoice(
-      logoPath: "assets/images/logo.png",
-      namaHotel: "Hotel Millenial",
-      alamat: "Jl. Contoh Alamat No. 123, Jakarta",
-      tanggalTransaksi: DateTime.now().toString().split(' ')[0], // Format YYYY-MM-DD
-      atasNama: aNamaController.text.trim(),
-      detailPesanan: selectedProducts.map((product) {
-        return {
-          "item": product.judulProduk,
-          "harga": product.hargaJual,
-          "jumlah": product.quantity,
-          "note": product.note ?? '-', // Pastikan tidak null
-        };
-      }).toList(),
-      getBiayaLayanan: (subtotal) => subtotal * 0.11, // Fungsi layanan 11%
-      getPpn: (subtotal) => subtotal * 0.10, // Fungsi PPN 10%
-     
-    );
-  },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Color(0xffE22323),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-    ),
-  ),
-  child: Icon(
-    Icons.print,
-    color: Colors.white,
-  ),
-),
-SizedBox(width: 10,),
-ElevatedButton(
-  onPressed: () {
-    KitchenReceipt.printKitchenReceipt(
-      atasNama: aNamaController.text.trim(),
-      detailPesanan: selectedProducts.map((product) {
-        return {
-          "item": product.judulProduk,
-          "jumlah": product.quantity,
-          "note": product.note ?? '-', // Pastikan tidak null
-        };
-      }).toList(), logoPath:  "assets/images/logo.png",
-    );
-  },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Color(0xffE22323), // Warna merah sesuai logo hotel
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-    ),
-  ),
-  child: Icon(
-    Icons.kitchen,
-    color: Colors.white,
-  ),
-),
-
-
-
+                                PdfGenerator.printInvoice(
+                                  logoPath: "assets/images/logo.png",
+                                  namaHotel: "Hotel Millenial",
+                                  alamat: "Jl. Contoh Alamat No. 123, Jakarta",
+                                  tanggalTransaksi: DateTime.now()
+                                      .toString()
+                                      .split(' ')[0], // Format YYYY-MM-DD
+                                  atasNama: aNamaController.text.trim(),
+                                  detailPesanan:
+                                      selectedProducts.map((product) {
+                                    return {
+                                      "item": product.judulProduk,
+                                      "harga": product.hargaJual,
+                                      "jumlah": product.quantity,
+                                      "note": product.note ??
+                                          '-', // Pastikan tidak null
+                                    };
+                                  }).toList(),
+                                  getBiayaLayanan: (subtotal) =>
+                                      subtotal * 0.11, // Fungsi layanan 11%
+                                  getPpn: (subtotal) =>
+                                      subtotal * 0.10, // Fungsi PPN 10%
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xffE22323),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.print,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                KitchenReceipt.printKitchenReceipt(
+                                  atasNama: aNamaController.text.trim(),
+                                  detailPesanan:
+                                      selectedProducts.map((product) {
+                                    return {
+                                      "item": product.judulProduk,
+                                      "jumlah": product.quantity,
+                                      "note": product.note ??
+                                          '-', // Pastikan tidak null
+                                    };
+                                  }).toList(),
+                                  logoPath: "assets/images/logo.png",
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(
+                                    0xffE22323), // Warna merah sesuai logo hotel
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.kitchen,
+                                color: Colors.white,
+                              ),
+                            ),
                           ],
                         ),
                       ),
