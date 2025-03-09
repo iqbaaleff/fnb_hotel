@@ -223,7 +223,7 @@ class _MakananState extends State<Makanan> {
                                       child: product.fotoProduk != null &&
                                               product.fotoProduk!.isNotEmpty
                                           ? Image.network(
-                                              'https://74gslzvj-3000.asse.devtunnels.ms${product.fotoProduk!}',
+                                              'https://xrzwvx14-5000.asse.devtunnels.ms${product.fotoProduk!}',
                                               fit: BoxFit.fill,
                                               width: double.infinity,
                                             )

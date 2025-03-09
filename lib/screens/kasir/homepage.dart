@@ -23,8 +23,8 @@ class _HomepageState extends State<Homepage> {
   int selectedColor = 0;
   List<Product> selectedProducts = [];
   String kasirName = '';
-  double biayaLayanan = 0.10;
-  double ppn = 0.05;
+  double biayaLayanan = 0.11;
+  double ppn = 0.10;
   double subtotal = 0;
   bool isNoteFilled = false;
 
@@ -74,12 +74,12 @@ class _HomepageState extends State<Homepage> {
 
   // Menghitung biaya layanan
   double getBiayaLayanan(double totalHarga) {
-    return totalHarga * biayaLayanan; // 10% dari total harga
+    return totalHarga * biayaLayanan; // 11% dari total harga
   }
 
 // Menghitung PPN
   double getPpn(double totalHarga) {
-    return totalHarga * ppn; // 5% dari total harga
+    return totalHarga * ppn; // 10% dari total harga
   }
 
 // Fungsi untuk menghitung subtotal harga dengan biaya layanan
@@ -168,7 +168,7 @@ class _HomepageState extends State<Homepage> {
 
       // Kirim data transaksi ke server
       final response = await _dio.post(
-        'https://74gslzvj-3000.asse.devtunnels.ms/api/order',
+        'https://xrzwvx14-5000.asse.devtunnels.ms/api/order',
         data: {
           'atasNama': aNamaController.text,
           'produk': produkData,
@@ -438,7 +438,7 @@ class _HomepageState extends State<Homepage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Total Harga:'),
+                                  Text('Sub total:'),
                                   Text(
                                     "Rp. ${totalHarga() != null ? formatAngka(totalHarga().toDouble()) : 'Tidak ada harga'}",
                                   ),
@@ -449,9 +449,9 @@ class _HomepageState extends State<Homepage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Biaya Layanan:'),
+                                  Text('Service:'),
                                   Text(
-                                    "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (10%)",
+                                    "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (11%)",
                                   ),
                                 ],
                               ),
@@ -460,9 +460,9 @@ class _HomepageState extends State<Homepage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('PPN:'),
+                                  Text('Tax:'),
                                   Text(
-                                    "Rp. ${formatAngka(getPpn(totalHarga()))} (5%)",
+                                    "Rp. ${formatAngka(getPpn(totalHarga()))} (10%)",
                                   ),
                                 ],
                               ),
@@ -472,7 +472,7 @@ class _HomepageState extends State<Homepage> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Subtotal:',
+                                    'Amount due:',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -854,7 +854,7 @@ class _HomepageState extends State<Homepage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Total Harga:'),
+                                  Text('Sub total:'),
                                   Text(
                                     "Rp. ${formatAngka(totalHarga().toDouble())}",
                                   ),
@@ -865,9 +865,9 @@ class _HomepageState extends State<Homepage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Biaya Layanan:'),
+                                  Text('Service:'),
                                   Text(
-                                    "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (10%)",
+                                    "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (11%)",
                                   ),
                                 ],
                               ),
@@ -875,9 +875,9 @@ class _HomepageState extends State<Homepage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('PPN:'),
+                                  Text('Tax:'),
                                   Text(
-                                    "Rp. ${formatAngka(getPpn(totalHarga()))} (5%)",
+                                    "Rp. ${formatAngka(getPpn(totalHarga()))} (10%)",
                                   ),
                                 ],
                               ),
@@ -887,7 +887,7 @@ class _HomepageState extends State<Homepage> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Subtotal:',
+                                    'Amount due:',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -903,7 +903,7 @@ class _HomepageState extends State<Homepage> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Jumlah Uang:',
+                                    'Amount of money:',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -978,47 +978,40 @@ class _HomepageState extends State<Homepage> {
                               width: 10,
                             ),
                             ElevatedButton(
-                              onPressed: () {
-                                PdfGenerator.printInvoice(
-                                  namaHotel: "Hotel Mewah",
-                                  alamat: "Jl. Contoh Alamat No. 123, Jakarta",
-                                  tanggalTransaksi: DateTime.now()
-                                      .toString()
-                                      .split(' ')[0], // Format YYYY-MM-DD
-                                  atasNama: aNamaController.text.trim(),
-                                  detailPesanan:
-                                      selectedProducts.map((product) {
-                                    return {
-                                      "item": product.judulProduk,
-                                      "harga": product.hargaJual,
-                                      "jumlah": product.quantity,
-                                      "note": product
-                                          .note, // Pastikan produk memiliki field 'note'
-                                    };
-                                  }).toList(),
-                                  total: totalHarga(),
-                                  getBiayaLayanan: (total) =>
-                                      total * 0.10, // Fungsi untuk layanan 10%
-                                  getPpn: (total) =>
-                                      total * 0.05, // Fungsi untuk PPN 5%
-                                  subtotal: subTotalHarga(),
-                                  catatan: selectedProducts
-                                      .map((product) => product.note)
-                                      .join(
-                                          ", "), // Menggabungkan catatan dari semua produk
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xffE22323),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.print,
-                                color: Colors.white,
-                              ),
-                            ),
+  onPressed: () {
+    double subtotal = subTotalHarga();
+
+    PdfGenerator.printInvoice(
+      logoPath: "assets/images/logo.png",
+      namaHotel: "Hotel Millenial",
+      alamat: "Jl. Contoh Alamat No. 123, Jakarta",
+      tanggalTransaksi: DateTime.now().toString().split(' ')[0], // Format YYYY-MM-DD
+      atasNama: aNamaController.text.trim(),
+      detailPesanan: selectedProducts.map((product) {
+        return {
+          "item": product.judulProduk,
+          "harga": product.hargaJual,
+          "jumlah": product.quantity,
+          "note": product.note ?? '-', // Pastikan tidak null
+        };
+      }).toList(),
+      getBiayaLayanan: (subtotal) => subtotal * 0.11, // Fungsi layanan 11%
+      getPpn: (subtotal) => subtotal * 0.10, // Fungsi PPN 10%
+     
+    );
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Color(0xffE22323),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+    ),
+  ),
+  child: Icon(
+    Icons.print,
+    color: Colors.white,
+  ),
+),
+
                           ],
                         ),
                       ),
