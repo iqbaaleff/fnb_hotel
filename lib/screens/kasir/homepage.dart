@@ -222,7 +222,7 @@ class _HomepageState extends State<Homepage> {
       setState(() {
         product.quantity--;
       });
-    }
+    } 
   }
 
 // Fungsi untuk memilih produk dan menambahkannya ke daftar selectedProducts

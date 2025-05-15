@@ -20,7 +20,7 @@ class ApiService {
   /// API Cemilan
   Future<List<Product>> getProductsMakanan() async {
     const String url =
-        'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk/Makanan';
+        'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk/Makanan';
 
     try {
       final token = await getToken();
@@ -54,7 +54,7 @@ class ApiService {
   /// API Coffe
   Future<List<Product>> getProductsMinuman() async {
     const String url =
-        'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk/Minuman';
+        'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk/Minuman';
 
     try {
       final token = await getToken();
@@ -88,7 +88,7 @@ class ApiService {
   /// API
   Future<List<Product>> getProductsCemilan() async {
     const String url =
-        'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk/Cemilan';
+        'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk/Cemilan';
 
     try {
       final token = await getToken();

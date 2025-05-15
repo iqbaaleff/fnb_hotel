@@ -219,7 +219,7 @@ class _MinumanState extends State<Minuman> {
                                       child: product.fotoProduk != null &&
                                               product.fotoProduk!.isNotEmpty
                                           ? Image.network(
-                                              'https://xrzwvx14-5000.asse.devtunnels.ms${product.fotoProduk!}',
+                                              'https://zshnvs5v-3000.asse.devtunnels.ms${product.fotoProduk!}',
                                               fit: BoxFit.fill,
                                               width: double.infinity,
                                             )
