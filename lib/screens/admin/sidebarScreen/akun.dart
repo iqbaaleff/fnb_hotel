@@ -31,7 +31,7 @@ class _AkunState extends State<Akun> {
         }
 
         final response = await _dio.post(
-          'https://xrzwvx14-5000.asse.devtunnels.ms/api/registerKasir', // Ganti dengan URL backend
+          'https://zshnvs5v-3000.asse.devtunnels.ms/api/registerKasir', // Ganti dengan URL backend
           data: {
             'username': _username,
             'password': _password,

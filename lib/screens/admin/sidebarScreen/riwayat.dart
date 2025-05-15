@@ -49,7 +49,7 @@ class _RiwayatState extends State<Riwayat> {
       dio.options.headers['Authorization'] = 'Bearer $token';
 
       var response = await dio.get(
-        'https://xrzwvx14-5000.asse.devtunnels.ms/api/transaksiOrder',
+        'https://zshnvs5v-3000.asse.devtunnels.ms/api/transaksiOrder',
       );
 
       // Debugging untuk melihat status code dan data respons

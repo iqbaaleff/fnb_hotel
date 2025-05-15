@@ -27,7 +27,7 @@ class _AddProductState extends State<AddProduct> {
   final CancelToken _cancelToken = CancelToken();
 
   // API Endpoint
-  final String apiUrl = 'https://xrzwvx14-5000.asse.devtunnels.ms/api/produk';
+  final String apiUrl = 'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk';
 
   // Fungsi untuk mengambil token dari SharedPreferences
   Future<String?> _getToken() async {

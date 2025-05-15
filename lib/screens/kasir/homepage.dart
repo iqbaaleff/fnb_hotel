@@ -169,7 +169,7 @@ class _HomepageState extends State<Homepage> {
 
       // Kirim data transaksi ke server
       final response = await _dio.post(
-        'https://xrzwvx14-5000.asse.devtunnels.ms/api/order',
+        'https://zshnvs5v-3000.asse.devtunnels.ms/api/order',
         data: {
           'atasNama': aNamaController.text,
           'produk': produkData,
