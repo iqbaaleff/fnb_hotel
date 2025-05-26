@@ -142,9 +142,29 @@ class _CemilanState extends State<Cemilan> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline,
+                                color: Colors.red, size: 50),
+                            SizedBox(height: 10),
+                            Text('No products available'),
+                          ],
+                        ),
+                      );
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No products available'));
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline,
+                                color: Colors.orange, size: 50),
+                            SizedBox(height: 10),
+                            Text('No products available'),
+                          ],
+                        ),
+                      );
                     }
 
                     return GridView.builder(

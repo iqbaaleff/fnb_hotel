@@ -37,9 +37,18 @@ class ApiService {
         ),
       );
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        List<dynamic> data = response.data['data'];
-        return data.map((product) => Product.fromJson(product)).toList();
+      if (response.statusCode == 200) {
+        if (response.data['success'] == true) {
+          List<dynamic> data = response.data['data'];
+          // Jika data kosong, kembalikan list kosong
+          if (data.isEmpty) {
+            return [];
+          }
+          return data.map((product) => Product.fromJson(product)).toList();
+        } else {
+          // Jika success false tapi status code 200, kembalikan list kosong
+          return [];
+        }
       } else {
         throw Exception(
           'Error ${response.statusCode}: ${response.data['message'] ?? 'Tidak diketahui'}',
@@ -47,7 +56,11 @@ class ApiService {
       }
     } catch (e) {
       print('Kesalahan API Makanan: $e');
-      throw Exception('Gagal memuat produk makanan: $e');
+      // Untuk error jaringan atau lainnya, tetap kembalikan list kosong
+      // atau bisa juga dilempar sebagai exception tergantung kebutuhan
+      return [];
+      // Alternatif jika ingin tetap menampilkan error:
+      // throw Exception('Gagal memuat produk Cemilan: $e');
     }
   }
 
@@ -71,9 +84,18 @@ class ApiService {
         ),
       );
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        List<dynamic> data = response.data['data'];
-        return data.map((product) => Product.fromJson(product)).toList();
+      if (response.statusCode == 200) {
+        if (response.data['success'] == true) {
+          List<dynamic> data = response.data['data'];
+          // Jika data kosong, kembalikan list kosong
+          if (data.isEmpty) {
+            return [];
+          }
+          return data.map((product) => Product.fromJson(product)).toList();
+        } else {
+          // Jika success false tapi status code 200, kembalikan list kosong
+          return [];
+        }
       } else {
         throw Exception(
           'Error ${response.statusCode}: ${response.data['message'] ?? 'Tidak diketahui'}',
@@ -81,7 +103,11 @@ class ApiService {
       }
     } catch (e) {
       print('Kesalahan API Minuman: $e');
-      throw Exception('Gagal memuat produk Minuman: $e');
+      // Untuk error jaringan atau lainnya, tetap kembalikan list kosong
+      // atau bisa juga dilempar sebagai exception tergantung kebutuhan
+      return [];
+      // Alternatif jika ingin tetap menampilkan error:
+      // throw Exception('Gagal memuat produk Cemilan: $e');
     }
   }
 
@@ -100,14 +126,23 @@ class ApiService {
         url,
         options: Options(
           headers: {
-            'Authorization': 'Bearer $token', // Tambahkan token ke header
+            'Authorization': 'Bearer $token',
           },
         ),
       );
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        List<dynamic> data = response.data['data'];
-        return data.map((product) => Product.fromJson(product)).toList();
+      if (response.statusCode == 200) {
+        if (response.data['success'] == true) {
+          List<dynamic> data = response.data['data'];
+          // Jika data kosong, kembalikan list kosong
+          if (data.isEmpty) {
+            return [];
+          }
+          return data.map((product) => Product.fromJson(product)).toList();
+        } else {
+          // Jika success false tapi status code 200, kembalikan list kosong
+          return [];
+        }
       } else {
         throw Exception(
           'Error ${response.statusCode}: ${response.data['message'] ?? 'Tidak diketahui'}',
@@ -115,7 +150,11 @@ class ApiService {
       }
     } catch (e) {
       print('Kesalahan API Cemilan: $e');
-      throw Exception('Gagal memuat produk Cemilan: $e');
+      // Untuk error jaringan atau lainnya, tetap kembalikan list kosong
+      // atau bisa juga dilempar sebagai exception tergantung kebutuhan
+      return [];
+      // Alternatif jika ingin tetap menampilkan error:
+      // throw Exception('Gagal memuat produk Cemilan: $e');
     }
   }
 }
