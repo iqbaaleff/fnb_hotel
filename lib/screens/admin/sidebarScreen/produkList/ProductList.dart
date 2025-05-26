@@ -291,6 +291,11 @@ class _ProductListState extends State<ProductList> {
                               )),
                               DataColumn(
                                   label: Text(
+                                'Stok',
+                                style: TextStyle(color: Colors.white),
+                              )),
+                              DataColumn(
+                                  label: Text(
                                 'Kategori',
                                 style: TextStyle(color: Colors.white),
                               )),
@@ -322,6 +327,8 @@ class _ProductListState extends State<ProductList> {
                                 DataCell(Text(produk['judul_produk'] ?? '-')),
                                 DataCell(Text(
                                     'Rp ${produk['hargaJual']?.toString() ?? '-'}')),
+                                DataCell(
+                                    Text(produk['stok']?.toString() ?? '-')),
                                 DataCell(
                                     Text(produk['kategori_produk'] ?? '-')),
                                 DataCell(Row(

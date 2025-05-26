@@ -131,7 +131,7 @@ class _AddProductState extends State<AddProduct> {
         return;
       }
 
-      final hargaAwal = _parseCurrency(_hargaAwalController.text);
+      final hargaAwal = _parseCurrency(_hargaJualController.text);
       final hargaJual = _parseCurrency(_hargaJualController.text);
       if (hargaAwal == null || hargaJual == null) {
         _safeExecute(() {
@@ -181,6 +181,7 @@ class _AddProductState extends State<AddProduct> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Produk berhasil ditambahkan!')),
             );
+            Navigator.pop(context, true);
           });
         } else {
           _safeExecute(() {
