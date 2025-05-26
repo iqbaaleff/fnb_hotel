@@ -12,10 +12,21 @@ class _AkunState extends State<Akun> {
   final _formKey = GlobalKey<FormState>();
   final _dio = Dio();
   String? _username, _password, _email, _noHp, _role;
+  bool _isLoading = false;
+
+  // TextEditingControllers for each text field
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _noHpController = TextEditingController();
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      setState(() {
+        _isLoading = true; // Show loading indicator
+      });
 
       try {
         // Ambil token admin dari SharedPreferences
@@ -27,11 +38,14 @@ class _AkunState extends State<Akun> {
             const SnackBar(
                 content: Text('Token tidak ditemukan, silakan login ulang')),
           );
+          setState(() {
+            _isLoading = false; // Hide loading indicator
+          });
           return;
         }
 
         final response = await _dio.post(
-          'https://zshnvs5v-3000.asse.devtunnels.ms/api/registerKasir', // Ganti dengan URL backend
+          'https://zshnvs5v-3000.asse.devtunnels.ms/api/registerKasir',
           data: {
             'username': _username,
             'password': _password,
@@ -41,7 +55,7 @@ class _AkunState extends State<Akun> {
           },
           options: Options(
             headers: {
-              'Authorization': 'Bearer $token', // Gunakan token admin
+              'Authorization': 'Bearer $token',
             },
           ),
         );
@@ -50,6 +64,15 @@ class _AkunState extends State<Akun> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registrasi berhasil!')),
           );
+          // Clear the form and text fields
+          _formKey.currentState!.reset();
+          _usernameController.clear();
+          _passwordController.clear();
+          _emailController.clear();
+          _noHpController.clear();
+          setState(() {
+            _role = null; // Reset dropdown value
+          });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Gagal registrasi')),
@@ -59,6 +82,10 @@ class _AkunState extends State<Akun> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${e.toString()}')),
         );
+      } finally {
+        setState(() {
+          _isLoading = false; // Hide loading indicator
+        });
       }
     }
   }
@@ -79,6 +106,16 @@ class _AkunState extends State<Akun> {
   }
 
   @override
+  void dispose() {
+    // Dispose controllers to prevent memory leaks
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _emailController.dispose();
+    _noHpController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +130,6 @@ class _AkunState extends State<Akun> {
         actions: [
           ElevatedButton(
             onPressed: () {
-              // Panggil fungsi logout
               logout(context);
             },
             style: ElevatedButton.styleFrom(
@@ -122,10 +158,10 @@ class _AkunState extends State<Akun> {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0), // Ketebalan garis
+          preferredSize: const Size.fromHeight(4.0),
           child: Container(
-            color: Color(0xffE22323), // Warna garis
-            height: 2.0, // Tinggi garis (ketebalan)
+            color: Color(0xffE22323),
+            height: 2.0,
           ),
         ),
       ),
@@ -137,6 +173,7 @@ class _AkunState extends State<Akun> {
           child: ListView(
             children: [
               TextFormField(
+                controller: _usernameController, // Assign controller
                 decoration: InputDecoration(
                   labelText: 'Username',
                   labelStyle: TextStyle(
@@ -166,6 +203,7 @@ class _AkunState extends State<Akun> {
                 height: 10,
               ),
               TextFormField(
+                controller: _passwordController, // Assign controller
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(
@@ -196,6 +234,7 @@ class _AkunState extends State<Akun> {
                 height: 10,
               ),
               TextFormField(
+                controller: _emailController, // Assign controller
                 decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(
@@ -225,6 +264,7 @@ class _AkunState extends State<Akun> {
                 height: 10,
               ),
               TextFormField(
+                controller: _noHpController, // Assign controller
                 decoration: InputDecoration(
                   labelText: 'No Hp',
                   labelStyle: TextStyle(
@@ -254,6 +294,7 @@ class _AkunState extends State<Akun> {
                 height: 10,
               ),
               DropdownButtonFormField<String>(
+                value: _role, // Bind dropdown value
                 decoration: InputDecoration(
                   labelText: 'Role',
                   labelStyle: TextStyle(
@@ -275,9 +316,9 @@ class _AkunState extends State<Akun> {
                     vertical: 5,
                   ),
                 ),
-                dropdownColor: Colors.white, // Warna latar dropdown
+                dropdownColor: Colors.white,
                 style: TextStyle(
-                  color: Color(0xffE22323), // Warna teks dalam dropdown
+                  color: Color(0xffE22323),
                 ),
                 items: ['kasir']
                     .map((role) => DropdownMenuItem(
@@ -285,27 +326,38 @@ class _AkunState extends State<Akun> {
                           child: Text(role),
                         ))
                     .toList(),
-                onChanged: (value) => _role = value,
+                onChanged: (value) => setState(() {
+                  _role = value;
+                }),
                 validator: (value) =>
                     value == null ? 'Role wajib dipilih' : null,
               ),
               const SizedBox(height: 50),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 300),
-                child: ElevatedButton(
-                  onPressed: _register,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xffE22323),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _register,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xffE22323),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        'Daftar',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Daftar',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
+                    if (_isLoading)
+                      const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                  ],
                 ),
               ),
             ],
