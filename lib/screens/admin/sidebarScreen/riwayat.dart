@@ -83,7 +83,7 @@ class _RiwayatState extends State<Riwayat> {
       dio.options.headers['Authorization'] = 'Bearer $token';
 
       var response = await dio.delete(
-        'https://74gslzvj-3000.asse.devtunnels.ms/api/deleteHistory/$id',
+        'https://zshnvs5v-3000.asse.devtunnels.ms/api/deleteHistory/$id',
       );
 
       if (response.statusCode == 200) {

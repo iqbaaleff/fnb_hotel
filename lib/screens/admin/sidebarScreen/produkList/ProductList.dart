@@ -192,7 +192,7 @@ class _ProductListState extends State<ProductList> {
                             DataCell(
                               produk['foto_produk'] != null
                                   ? Image.network(
-                                      'https://zshnvs5v-3000.asse.devtunnels.ms/${produk['foto_produk']}',
+                                      'https://zshnvs5v-3000.asse.devtunnels.ms${produk['foto_produk']}',
                                       width: 50,
                                       height: 50,
                                       fit: BoxFit.cover,

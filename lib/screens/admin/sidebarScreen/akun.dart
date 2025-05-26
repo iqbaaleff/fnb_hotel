@@ -166,7 +166,6 @@ class _AkunState extends State<Akun> {
                 height: 10,
               ),
               TextFormField(
-                
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(

@@ -129,7 +129,6 @@ class _MakananState extends State<Makanan> {
                       borderSide:
                           BorderSide(color: Color(0xffE22323)), // Border merah
                     ),
-                    
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 5,
