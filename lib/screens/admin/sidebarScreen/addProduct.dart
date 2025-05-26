@@ -1,10 +1,25 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:fnb_hotel/services/logoutFunction.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// Assuming logoutFunction.dart exists and contains a logout function
+import 'package:fnb_hotel/services/logoutFunction.dart';
+
+enum ProductCategory { makanan, minuman, cemilan }
+
+// Extension to capitalize enum strings
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
+  }
+}
+
+class AppColors {
+  static const primary = Color(0xff0C085C);
+  static const accent = Color(0xffE22323);
+}
 
 class AddProduct extends StatefulWidget {
   @override
@@ -14,6 +29,8 @@ class AddProduct extends StatefulWidget {
 class _AddProductState extends State<AddProduct> {
   final _formKey = GlobalKey<FormState>();
   final Dio _dio = Dio();
+  final ImagePicker _picker = ImagePicker();
+  final CancelToken _cancelToken = CancelToken();
 
   // Controllers
   final TextEditingController _judulController = TextEditingController();
@@ -21,76 +38,122 @@ class _AddProductState extends State<AddProduct> {
   final TextEditingController _hargaJualController = TextEditingController();
   final TextEditingController _stokController = TextEditingController();
 
-  String _kategoriProduk = 'Makanan';
+  ProductCategory _kategoriProduk = ProductCategory.makanan;
   String? _fotoProduk;
-
-  final ImagePicker _picker = ImagePicker();
-  final CancelToken _cancelToken = CancelToken();
+  bool _isLoading = false;
 
   final NumberFormat currencyFormat = NumberFormat.currency(
-    locale: 'id_ID', // Locale Indonesia
-    symbol: 'Rp ', // Simbol mata uang
+    locale: 'id_ID',
+    symbol: 'Rp ',
     decimalDigits: 0,
   );
 
-  void _onHargaAwalChanged(String value) {
+  // Helper function to safely execute setState or ScaffoldMessenger
+  void _safeExecute(VoidCallback callback) {
+    if (mounted) {
+      callback();
+    }
+  }
+
+  // Format currency input
+  void _onHargaChanged(String value, TextEditingController controller) {
     String sanitizedValue = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (sanitizedValue.isNotEmpty) {
       final int parsedValue = int.parse(sanitizedValue);
       final String formattedValue = currencyFormat.format(parsedValue);
-      _hargaAwalController.value = TextEditingValue(
+      controller.value = TextEditingValue(
         text: formattedValue,
         selection: TextSelection.collapsed(offset: formattedValue.length),
       );
     } else {
-      _hargaAwalController.clear();
+      controller.clear();
     }
   }
 
-  void _onHargaJualChanged(String value) {
-    String sanitizedValue = value.replaceAll(RegExp(r'[^0-9]'), '');
-    if (sanitizedValue.isNotEmpty) {
-      final int parsedValue = int.parse(sanitizedValue);
-      final String formattedValue = currencyFormat.format(parsedValue);
-      _hargaJualController.value = TextEditingValue(
-        text: formattedValue,
-        selection: TextSelection.collapsed(offset: formattedValue.length),
-      );
-    } else {
-      _hargaJualController.clear();
+  // Parse currency string to int
+  int? _parseCurrency(String value) {
+    try {
+      String sanitizedValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+      return sanitizedValue.isNotEmpty ? int.parse(sanitizedValue) : null;
+    } catch (e) {
+      return null;
     }
   }
 
-  // API Endpoint
-  final String apiUrl = 'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk';
-
-  // Fungsi untuk mengambil token dari SharedPreferences
+  // Get token from SharedPreferences
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
 
-  // Fungsi untuk mengunggah data ke API
+  // Pick image with validation
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        final file = File(pickedFile.path);
+        final sizeInMB = (await file.length()) / (1024 * 1024);
+        if (sizeInMB > 5) {
+          _safeExecute(() {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Ukuran gambar terlalu besar (maks 5MB)')),
+            );
+          });
+          return;
+        }
+        _safeExecute(() {
+          setState(() {
+            _fotoProduk = pickedFile.path;
+          });
+        });
+      }
+    } catch (e) {
+      _safeExecute(() {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memilih gambar: $e')),
+        );
+      });
+    }
+  }
+
+  // Submit form to API
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final token = await _getToken();
       if (token == null) {
-        if (mounted) {
+        _safeExecute(() {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Token tidak ditemukan. Silakan login kembali.'),
-            ),
+                content: Text('Token tidak ditemukan. Silakan login kembali.')),
           );
-        }
+        });
         return;
       }
 
+      final hargaAwal = _parseCurrency(_hargaAwalController.text);
+      final hargaJual = _parseCurrency(_hargaJualController.text);
+      if (hargaAwal == null || hargaJual == null) {
+        _safeExecute(() {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Harga tidak valid')),
+          );
+        });
+        return;
+      }
+
+      _safeExecute(() {
+        setState(() {
+          _isLoading = true;
+        });
+      });
+
       final formData = FormData.fromMap({
         'judul_produk': _judulController.text,
-        'hargaAwal': int.parse(_hargaAwalController.text),
-        'hargaJual': int.parse(_hargaJualController.text),
+        'hargaAwal': hargaJual,
+        'hargaJual': hargaJual,
         'stok': int.parse(_stokController.text),
-        'kategori_produk': _kategoriProduk,
+        'kategori_produk': _kategoriProduk.toString().split('.').last,
         'foto_produk': _fotoProduk != null
             ? await MultipartFile.fromFile(_fotoProduk!)
             : null,
@@ -98,57 +161,63 @@ class _AddProductState extends State<AddProduct> {
 
       try {
         final response = await _dio.post(
-          apiUrl,
+          'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk',
           data: formData,
-          options: Options(
-            headers: {
-              'Authorization': 'Bearer $token',
-            },
-          ),
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
           cancelToken: _cancelToken,
         );
 
         if (response.statusCode == 201) {
-          if (mounted) {
+          _safeExecute(() {
             setState(() {
+              _formKey.currentState?.reset();
               _judulController.clear();
               _hargaAwalController.clear();
               _hargaJualController.clear();
               _stokController.clear();
-              _kategoriProduk = 'Makanan';
+              _kategoriProduk = ProductCategory.makanan;
               _fotoProduk = null;
             });
-          }
-          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Produk berhasil ditambahkan!')),
             );
-          }
+          });
         } else {
-          if (mounted) {
+          _safeExecute(() {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Gagal menambahkan produk!')),
+              SnackBar(
+                  content:
+                      Text('Gagal menambahkan produk: ${response.statusCode}')),
             );
-          }
+          });
+        }
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 401) {
+          _safeExecute(() {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Sesi telah berakhir. Silakan login kembali.')),
+            );
+          });
+          await logout(context); // Ensure logout function is implemented
+        } else {
+          _safeExecute(() {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Terjadi kesalahan: ${e.message}')),
+            );
+          });
         }
       } catch (e) {
-        if (mounted) {
+        _safeExecute(() {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Terjadi kesalahan: $e')),
+            SnackBar(content: Text('Terjadi kesalahan tidak terduga: $e')),
           );
-        }
-      }
-    }
-  }
-
-  // Fungsi untuk memilih foto
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      if (mounted) {
-        setState(() {
-          _fotoProduk = pickedFile.path;
+        });
+      } finally {
+        _safeExecute(() {
+          setState(() {
+            _isLoading = false;
+          });
         });
       }
     }
@@ -168,47 +237,18 @@ class _AddProductState extends State<AddProduct> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Produk',
-            style: TextStyle(
-              color: Color(0xff0C085C),
-              fontWeight: FontWeight.bold,
-            )),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              // Panggil fungsi logout
-              logout(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xffE22323),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.logout_rounded,
-                  color: Colors.white,
-                ),
-                Text(
-                  "Logout",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                )
-              ],
-            ),
+        title: const Text(
+          'Tambah Produk',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
           ),
-          SizedBox(
-            width: 30,
-          ),
-        ],
+        ),
         backgroundColor: Colors.white,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
           child: Container(
-            color: const Color(0xffE22323),
+            color: AppColors.accent,
             height: 2.0,
           ),
         ),
@@ -227,26 +267,22 @@ class _AddProductState extends State<AddProduct> {
                   controller: _judulController,
                   decoration: InputDecoration(
                     labelText: 'Judul Produk',
-                    labelStyle: TextStyle(
-                      color: Color(0xff0C085C),
-                    ),
+                    labelStyle: const TextStyle(color: AppColors.primary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -258,69 +294,31 @@ class _AddProductState extends State<AddProduct> {
                 const SizedBox(height: 16),
 
                 // Harga Awal
-                TextFormField(
-                  controller: _hargaAwalController,
-                  onChanged: _onHargaAwalChanged,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Harga Awal',
-                    labelStyle: TextStyle(
-                      color: Color(0xff0C085C),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Harga awal tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
 
                 // Harga Jual
                 TextFormField(
                   controller: _hargaJualController,
-                  onChanged: _onHargaJualChanged,
+                  onChanged: (value) =>
+                      _onHargaChanged(value, _hargaJualController),
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Harga Jual',
-                    labelStyle: TextStyle(
-                      color: Color(0xff0C085C),
-                    ),
+                    labelStyle: const TextStyle(color: AppColors.primary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -337,30 +335,29 @@ class _AddProductState extends State<AddProduct> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Stok',
-                    labelStyle: TextStyle(
-                      color: Color(0xff0C085C),
-                    ),
+                    labelStyle: const TextStyle(color: AppColors.primary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Stok tidak boleh kosong';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Stok harus berupa angka';
                     }
                     return null;
                   },
@@ -368,82 +365,93 @@ class _AddProductState extends State<AddProduct> {
                 const SizedBox(height: 16),
 
                 // Kategori Produk
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<ProductCategory>(
                   value: _kategoriProduk,
-
-                  items: ['Makanan', 'Minuman', 'Cemilan']
+                  items: ProductCategory.values
                       .map((kategori) => DropdownMenuItem(
                             value: kategori,
-                            child: Text(kategori),
+                            child: Text(kategori
+                                .toString()
+                                .split('.')
+                                .last
+                                .capitalize()),
                           ))
                       .toList(),
                   onChanged: (value) {
-                    setState(() {
-                      _kategoriProduk = value!;
+                    _safeExecute(() {
+                      setState(() {
+                        _kategoriProduk = value!;
+                      });
                     });
                   },
                   decoration: InputDecoration(
-                    labelText: 'Role',
-                    labelStyle: TextStyle(
-                      color: Color(0xff0C085C),
-                    ),
+                    labelText: 'Kategori',
+                    labelStyle: const TextStyle(color: AppColors.primary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Color(0xffE22323), width: 2),
+                          const BorderSide(color: AppColors.accent, width: 2),
                     ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   ),
-                  dropdownColor: Colors.white, // Warna latar dropdown
-                  style: TextStyle(
-                    color: Color(0xff0C085C), // Warna teks dalam dropdown
-                  ),
+                  dropdownColor: Colors.white,
+                  style: const TextStyle(color: AppColors.primary),
                 ),
                 const SizedBox(height: 16),
 
                 // Foto Produk
                 ElevatedButton(
-                  onPressed: _pickImage,
+                  onPressed: _isLoading ? null : _pickImage,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xffE22323),
+                    backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: Text(
                     _fotoProduk == null ? 'Pilih Foto' : 'Ganti Foto',
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
-                if (_fotoProduk != null) Image.file(File(_fotoProduk!)),
-
+                if (_fotoProduk != null)
+                  Container(
+                    height: 200,
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(top: 16),
+                    child: Image.file(File(_fotoProduk!), fit: BoxFit.cover),
+                  ),
                 const SizedBox(height: 16),
 
-                // Tombol Submit
+                // Submit and Reset Buttons
                 Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xffE22323),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onPressed: _submitForm,
-                    child: const Text(
-                      'Simpan Produk',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.accent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onPressed: _submitForm,
+                              child: const Text(
+                                'Simpan Produk',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                    ],
                   ),
                 ),
               ],

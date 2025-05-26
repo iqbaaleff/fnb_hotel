@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:fnb_hotel/screens/admin/sidebarScreen/addProduct.dart';
+import 'package:fnb_hotel/screens/admin/sidebarScreen/editProduct.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/services/logoutFunction.dart';
 
@@ -336,12 +337,17 @@ class _ProductListState extends State<ProductList> {
                                       icon: const Icon(Icons.edit,
                                           color: Colors.blue),
                                       onPressed: () {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                              content: Text(
-                                                  'Fitur update belum diimplementasikan')),
-                                        );
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => EditProduct(
+                                                productData: produk),
+                                          ),
+                                        ).then((success) {
+                                          if (success == true) {
+                                            // Refresh data produk jika diperlukan
+                                          }
+                                        });
                                       },
                                     ),
                                   ],
