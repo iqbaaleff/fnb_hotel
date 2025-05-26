@@ -289,17 +289,35 @@ class _RiwayatState extends State<Riwayat> {
                                         'Apakah Anda yakin ingin menghapus transaksi ini?'),
                                     actions: [
                                       TextButton(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(25)),
+                                        ),
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },
-                                        child: Text('Batal'),
+                                        child: Text(
+                                          'Batal',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                       ),
                                       TextButton(
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(25)),
+                                        ),
                                         onPressed: () {
                                           Navigator.pop(context);
                                           hapusTransaksi(transaksi['id']);
                                         },
-                                        child: Text('Hapus'),
+                                        child: Text(
+                                          'Hapus',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                       ),
                                     ],
                                   ),

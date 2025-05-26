@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fnb_hotel/screens/admin/sidebarScreen/produkList/ProductList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fnb_hotel/screens/admin/sidebarScreen/addProduct.dart';
 import 'package:fnb_hotel/screens/admin/sidebarScreen/akun.dart';
@@ -39,7 +40,7 @@ class _SidebarAdminState extends State<SidebarAdmin> {
 
     // Inisialisasi _pages setelah widget.isAdmin tersedia
     _pages = [
-      AddProduct(),
+      ProductList(),
       Riwayat(),
       Akun(),
     ];

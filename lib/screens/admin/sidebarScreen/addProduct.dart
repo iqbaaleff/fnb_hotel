@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:fnb_hotel/services/logoutFunction.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddProduct extends StatefulWidget {
@@ -25,6 +26,40 @@ class _AddProductState extends State<AddProduct> {
 
   final ImagePicker _picker = ImagePicker();
   final CancelToken _cancelToken = CancelToken();
+
+  final NumberFormat currencyFormat = NumberFormat.currency(
+    locale: 'id_ID', // Locale Indonesia
+    symbol: 'Rp ', // Simbol mata uang
+    decimalDigits: 0,
+  );
+
+  void _onHargaAwalChanged(String value) {
+    String sanitizedValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (sanitizedValue.isNotEmpty) {
+      final int parsedValue = int.parse(sanitizedValue);
+      final String formattedValue = currencyFormat.format(parsedValue);
+      _hargaAwalController.value = TextEditingValue(
+        text: formattedValue,
+        selection: TextSelection.collapsed(offset: formattedValue.length),
+      );
+    } else {
+      _hargaAwalController.clear();
+    }
+  }
+
+  void _onHargaJualChanged(String value) {
+    String sanitizedValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (sanitizedValue.isNotEmpty) {
+      final int parsedValue = int.parse(sanitizedValue);
+      final String formattedValue = currencyFormat.format(parsedValue);
+      _hargaJualController.value = TextEditingValue(
+        text: formattedValue,
+        selection: TextSelection.collapsed(offset: formattedValue.length),
+      );
+    } else {
+      _hargaJualController.clear();
+    }
+  }
 
   // API Endpoint
   final String apiUrl = 'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk';
@@ -225,6 +260,7 @@ class _AddProductState extends State<AddProduct> {
                 // Harga Awal
                 TextFormField(
                   controller: _hargaAwalController,
+                  onChanged: _onHargaAwalChanged,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Harga Awal',
@@ -261,6 +297,7 @@ class _AddProductState extends State<AddProduct> {
                 // Harga Jual
                 TextFormField(
                   controller: _hargaJualController,
+                  onChanged: _onHargaJualChanged,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Harga Jual',
