@@ -45,7 +45,7 @@ class _AkunState extends State<Akun> {
         }
 
         final response = await _dio.post(
-          'https://zshnvs5v-3000.asse.devtunnels.ms/api/registerKasir',
+          'https://c0f4hw0m-4000.asse.devtunnels.ms/api/registerKasir',
           data: {
             'username': _username,
             'password': _password,

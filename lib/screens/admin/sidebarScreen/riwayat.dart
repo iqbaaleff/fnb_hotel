@@ -49,7 +49,7 @@ class _RiwayatState extends State<Riwayat> {
       dio.options.headers['Authorization'] = 'Bearer $token';
 
       var response = await dio.get(
-        'https://zshnvs5v-3000.asse.devtunnels.ms/api/transaksiOrder',
+        'https://c0f4hw0m-4000.asse.devtunnels.ms/api/transaksiOrder',
       );
 
       // Debugging untuk melihat status code dan data respons
@@ -83,7 +83,7 @@ class _RiwayatState extends State<Riwayat> {
       dio.options.headers['Authorization'] = 'Bearer $token';
 
       var response = await dio.delete(
-        'https://zshnvs5v-3000.asse.devtunnels.ms/api/deleteHistory/$id',
+        'https://c0f4hw0m-4000.asse.devtunnels.ms/api/deleteHistory/$id',
       );
 
       if (response.statusCode == 200) {

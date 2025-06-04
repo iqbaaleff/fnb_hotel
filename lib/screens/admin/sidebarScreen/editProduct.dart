@@ -53,7 +53,7 @@ class _EditProductState extends State<EditProduct> {
   );
 
   // Base URL for images
-  static const String baseUrl = 'https://zshnvs5v-3000.asse.devtunnels.ms';
+  static const String baseUrl = 'https://c0f4hw0m-4000.asse.devtunnels.ms';
 
   @override
   void initState() {

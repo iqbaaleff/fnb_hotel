@@ -12,7 +12,7 @@ class ProductList extends StatefulWidget {
 
 class _ProductListState extends State<ProductList> {
   final Dio _dio = Dio();
-  final String apiUrl = 'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk';
+  final String apiUrl = 'https://c0f4hw0m-4000.asse.devtunnels.ms/api/produk';
   List<dynamic> _produkList = [];
   bool _isLoading = true;
 
@@ -88,7 +88,7 @@ class _ProductListState extends State<ProductList> {
       }
 
       final response = await _dio.delete(
-        'https://zshnvs5v-3000.asse.devtunnels.ms/api/delete/$id',
+        'https://c0f4hw0m-4000.asse.devtunnels.ms/api/delete/$id',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -313,7 +313,7 @@ class _ProductListState extends State<ProductList> {
                                 DataCell(
                                   produk['foto_produk'] != null
                                       ? Image.network(
-                                          'https://zshnvs5v-3000.asse.devtunnels.ms${produk['foto_produk']}',
+                                          'https://c0f4hw0m-4000.asse.devtunnels.ms${produk['foto_produk']}',
                                           width: 50,
                                           height: 50,
                                           fit: BoxFit.cover,

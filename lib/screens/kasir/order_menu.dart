@@ -260,7 +260,7 @@ class _OrderMenuState extends State<OrderMenu> {
                                                     products
                                                         .fotoProduk!.isNotEmpty
                                                 ? Image.network(
-                                                    'https://zshnvs5v-3000.asse.devtunnels.ms${products.fotoProduk!}',
+                                                    'https://c0f4hw0m-4000.asse.devtunnels.ms${products.fotoProduk!}',
                                                     fit: BoxFit.contain,
                                                     width: widget.size.width *
                                                         0.05,
