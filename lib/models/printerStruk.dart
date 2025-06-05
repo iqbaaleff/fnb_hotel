@@ -33,9 +33,12 @@ class PdfGenerator {
       await bluetooth.printCustom("Atas Nama: $atasNama", 0, 0);
       await bluetooth.printNewLine();
 
-      await bluetooth.printCustom("--------------------------------", 0, 0);
-      await bluetooth.printCustom("Item         Qty   Harga   Total", 0, 0);
-      await bluetooth.printCustom("--------------------------------", 0, 0);
+      await bluetooth.printCustom(
+          "------------------------------------------", 0, 0);
+      await bluetooth.printCustom(
+          "Item         Qty     Price      Total", 0, 0);
+      await bluetooth.printCustom(
+          "------------------------------------------", 0, 0);
 
       for (var item in detailPesanan) {
         String name = item['item'];
@@ -43,27 +46,23 @@ class PdfGenerator {
         int harga = item['harga'];
         int total = qty * harga;
         await bluetooth.printCustom(
-          "${name.padRight(12)} ${qty}x  ${formatCurrency.format(harga)}",
+          "${name.padRight(12)}  ${qty}   ${formatCurrency.format(harga)}  ${formatCurrency.format(total)}",
           0,
           0,
         );
-        await bluetooth.printCustom(
-          "Total: ${formatCurrency.format(total)}",
-          0,
-          2,
-        );
-        await bluetooth.printCustom("--------------------------------", 0, 0);
       }
-
+      await bluetooth.printCustom(
+          "------------------------------------------", 0, 0);
       await bluetooth.printCustom(
           "Subtotal     : ${formatCurrency.format(subtotal)}", 0, 2);
       await bluetooth.printCustom(
-          "PPN (10%)    : ${formatCurrency.format(ppn)}", 0, 2);
+          "Tax (10%)    : ${formatCurrency.format(ppn)}", 0, 2);
       await bluetooth.printCustom(
-          "Layanan (11%): ${formatCurrency.format(layanan)}", 0, 2);
-      await bluetooth.printCustom("--------------------------------", 0, 0);
+          "Service (11%): ${formatCurrency.format(layanan)}", 0, 2);
       await bluetooth.printCustom(
-          "TOTAL        : ${formatCurrency.format(amountDue)}", 2, 2);
+          "------------------------------------------", 0, 0);
+      await bluetooth.printCustom(
+          "TOTAL  : ${formatCurrency.format(amountDue)}", 1, 2);
 
       if (catatan != null && catatan.isNotEmpty) {
         await bluetooth.printNewLine();

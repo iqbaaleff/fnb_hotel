@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:drago_blue_printer/drago_blue_printer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fnb_hotel/models/printerStruk.dart';
 import 'package:fnb_hotel/models/printerStrukKitchen.dart';
 import 'package:fnb_hotel/models/produk.dart';
@@ -262,43 +264,113 @@ class _HomepageState extends State<Homepage> {
   }
 
   void popupConnectPrint(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final bluetooth = DragoBluePrinter.instance;
+    List<BluetoothDevice> devices = [];
+    BluetoothDevice? selectedDevice;
+    bool connected = false;
+
+    void showSnack(String msg) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: Color(0xffE22323),
-              width: 2,
-            ),
-          ),
-          title: Text("isi Judul"),
-          content: Column(
-            children: [Text("AAAAAAAAA")],
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xffE22323),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> initBluetooth() async {
+              try {
+                devices = await bluetooth.getBondedDevices();
+                connected = await bluetooth.isConnected ?? false;
+                setState(() {});
+              } on PlatformException {
+                showSnack("Gagal mengambil perangkat Bluetooth");
+              }
+            }
+
+            Future<void> connect() async {
+              if (selectedDevice == null) {
+                showSnack("Pilih perangkat terlebih dahulu");
+                return;
+              }
+              try {
+                await bluetooth.connect(selectedDevice!);
+                setState(() => connected = true);
+                showSnack("Berhasil terhubung ke ${selectedDevice!.name}");
+              } catch (e) {
+                showSnack("Gagal menghubungkan: $e");
+              }
+            }
+
+            Future<void> disconnect() async {
+              await bluetooth.disconnect();
+              setState(() => connected = false);
+            }
+
+            // Panggil init sekali di build pertama
+            if (devices.isEmpty) {
+              initBluetooth();
+            }
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(
+                  color: Color(0xffE22323),
+                  width: 2,
                 ),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Batal",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+              title: const Text("Koneksi Bluetooth Printer"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButton<BluetoothDevice>(
+                    isExpanded: true,
+                    hint: const Text("Pilih perangkat"),
+                    value: selectedDevice,
+                    items: devices.map((device) {
+                      return DropdownMenuItem(
+                        value: device,
+                        child: Text(device.name ?? "Tanpa Nama"),
+                      );
+                    }).toList(),
+                    onChanged: (device) {
+                      setState(() => selectedDevice = device);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          connected ? Colors.red : const Color(0xffE22323),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: connected ? disconnect : connect,
+                    child: Text(
+                      connected ? "Disconnect" : "Connect",
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              actions: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffE22323),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text("Batal",
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -908,6 +980,68 @@ class _HomepageState extends State<Homepage> {
                         child: Column(
                           children: [
                             Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    KitchenPrinter.printKitchenOrder(
+                                      atasNama: aNamaController.text.trim(),
+                                      detailPesanan:
+                                          selectedProducts.map((product) {
+                                        return {
+                                          "item": product.judulProduk,
+                                          "jumlah": product.quantity,
+                                          "note": product.note ?? '-',
+                                        };
+                                      }).toList(),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xffE22323),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  child:
+                                      Icon(Icons.kitchen, color: Colors.white),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    double subtotal = subTotalHarga();
+
+                                    PdfGenerator.printThermalInvoice(
+                                      // 👈 ganti dari printInvoice ke printThermalInvoice
+                                      namaHotel: "Millenial Hotel",
+                                      alamat:
+                                          "Jl. Kolonel Masturi 300, RT.04/RW.14,\n Jambudipa, Kec. Cisarua,\n Kab. Bandung Barat,\n Jawa Barat",
+                                      tanggalTransaksi: DateTime.now()
+                                          .toString()
+                                          .split(' ')[0],
+                                      atasNama: aNamaController.text.trim(),
+                                      detailPesanan:
+                                          selectedProducts.map((product) {
+                                        return {
+                                          "item": product.judulProduk,
+                                          "harga": product.hargaJual,
+                                          "jumlah": product.quantity,
+                                          "note": product.note ?? '-',
+                                        };
+                                      }).toList(),
+                                      getBiayaLayanan: (subtotal) =>
+                                          subtotal * 0.11,
+                                      getPpn: (subtotal) => subtotal * 0.10,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xffE22323),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  child: Icon(Icons.print, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('Sub total:'),
@@ -1048,7 +1182,7 @@ class _HomepageState extends State<Homepage> {
                             SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () {
-                                KitchenReceipt.printKitchenReceipt(
+                                KitchenPrinter.printKitchenOrder(
                                   atasNama: aNamaController.text.trim(),
                                   detailPesanan:
                                       selectedProducts.map((product) {
@@ -1058,7 +1192,6 @@ class _HomepageState extends State<Homepage> {
                                       "note": product.note ?? '-',
                                     };
                                   }).toList(),
-                                  logoPath: "assets/images/logo.png",
                                 );
                               },
                               style: ElevatedButton.styleFrom(
