@@ -161,7 +161,7 @@ class _AddProductState extends State<AddProduct> {
 
       try {
         final response = await _dio.post(
-          'https://c0f4hw0m-4000.asse.devtunnels.ms/api/produk',
+          'https://zshnvs5v-3000.asse.devtunnels.ms/api/produk',
           data: formData,
           options: Options(headers: {'Authorization': 'Bearer $token'}),
           cancelToken: _cancelToken,

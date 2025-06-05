@@ -169,7 +169,7 @@ class _HomepageState extends State<Homepage> {
 
       // Kirim data transaksi ke server
       final response = await _dio.post(
-        'https://c0f4hw0m-4000.asse.devtunnels.ms/api/order',
+        'https://zshnvs5v-3000.asse.devtunnels.ms/api/order',
         data: {
           'atasNama': aNamaController.text,
           'produk': produkData,
@@ -837,10 +837,7 @@ class _HomepageState extends State<Homepage> {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: Color(0xffE22323),
-              width: 2,
-            ),
+            side: BorderSide(color: Color(0xffE22323), width: 2),
           ),
           content: Stack(
             children: [
@@ -848,9 +845,7 @@ class _HomepageState extends State<Homepage> {
                 width: size.width * 0.4,
                 height: size.height * 0.6,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: size.width * 0.06,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: size.width * 0.06),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -865,95 +860,75 @@ class _HomepageState extends State<Homepage> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(
-                        height: size.height * 0.1,
-                      ),
+                      SizedBox(height: size.height * 0.1),
                       Expanded(
-                        child: Container(
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Sub total:'),
-                                  Text(
-                                    "Rp. ${formatAngka(totalHarga().toDouble())}",
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Service:'),
-                                  Text(
-                                    "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (11%)",
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Tax:'),
-                                  Text(
-                                    "Rp. ${formatAngka(getPpn(totalHarga()))} (10%)",
-                                  ),
-                                ],
-                              ),
-                              Divider(thickness: 1, color: Colors.grey),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Amount due:',
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Sub total:'),
+                                Text(
+                                    "Rp. ${formatAngka(totalHarga().toDouble())}"),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Service:'),
+                                Text(
+                                  "Rp. ${formatAngka(getBiayaLayanan(totalHarga()))} (11%)",
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Tax:'),
+                                Text(
+                                  "Rp. ${formatAngka(getPpn(totalHarga()))} (10%)",
+                                ),
+                              ],
+                            ),
+                            Divider(thickness: 1, color: Colors.grey),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Amount due:',
                                     style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    "Rp. ${formatAngka(subTotalHarga().toDouble())}",
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                  "Rp. ${formatAngka(subTotalHarga().toDouble())}",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Amount of money:',
                                     style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Amount of money:',
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                  "Rp. ${formatAngka(nominalBayar.toDouble())}",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Kembalian:',
                                     style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    "Rp. ${formatAngka(nominalBayar.toDouble())}",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Kembalian:',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    "Rp. ${formatAngka(kembalian.toDouble())}",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                  "Rp. ${formatAngka(kembalian.toDouble())}",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                       Padding(
@@ -970,7 +945,7 @@ class _HomepageState extends State<Homepage> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => Homepage()),
-                                    (Route<dynamic> route) => false,
+                                    (route) => false,
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -981,35 +956,29 @@ class _HomepageState extends State<Homepage> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.storefront_outlined,
-                                      color: Colors.white,
-                                    ),
-                                    Text(
-                                      "Home",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white),
-                                    ),
+                                    Icon(Icons.storefront_outlined,
+                                        color: Colors.white),
+                                    SizedBox(width: 5),
+                                    Text("Home",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white)),
                                   ],
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
+                            SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () {
                                 double subtotal = subTotalHarga();
 
-                                PdfGenerator.printInvoice(
-                                  logoPath: "assets/images/logo.png",
+                                PdfGenerator.printThermalInvoice(
+                                  // 👈 ganti dari printInvoice ke printThermalInvoice
                                   namaHotel: "Hotel Millenial",
                                   alamat: "Jl. Contoh Alamat No. 123, Jakarta",
-                                  tanggalTransaksi: DateTime.now()
-                                      .toString()
-                                      .split(' ')[0], // Format YYYY-MM-DD
+                                  tanggalTransaksi:
+                                      DateTime.now().toString().split(' ')[0],
                                   atasNama: aNamaController.text.trim(),
                                   detailPesanan:
                                       selectedProducts.map((product) {
@@ -1017,14 +986,12 @@ class _HomepageState extends State<Homepage> {
                                       "item": product.judulProduk,
                                       "harga": product.hargaJual,
                                       "jumlah": product.quantity,
-                                      "note": product.note ??
-                                          '-', // Pastikan tidak null
+                                      "note": product.note ?? '-',
                                     };
                                   }).toList(),
                                   getBiayaLayanan: (subtotal) =>
-                                      subtotal * 0.11, // Fungsi layanan 11%
-                                  getPpn: (subtotal) =>
-                                      subtotal * 0.10, // Fungsi PPN 10%
+                                      subtotal * 0.11,
+                                  getPpn: (subtotal) => subtotal * 0.10,
                                 );
                               },
                               style: ElevatedButton.styleFrom(
@@ -1033,14 +1000,9 @@ class _HomepageState extends State<Homepage> {
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                               ),
-                              child: Icon(
-                                Icons.print,
-                                color: Colors.white,
-                              ),
+                              child: Icon(Icons.print, color: Colors.white),
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
+                            SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () {
                                 KitchenReceipt.printKitchenReceipt(
@@ -1050,24 +1012,19 @@ class _HomepageState extends State<Homepage> {
                                     return {
                                       "item": product.judulProduk,
                                       "jumlah": product.quantity,
-                                      "note": product.note ??
-                                          '-', // Pastikan tidak null
+                                      "note": product.note ?? '-',
                                     };
                                   }).toList(),
                                   logoPath: "assets/images/logo.png",
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(
-                                    0xffE22323), // Warna merah sesuai logo hotel
+                                backgroundColor: Color(0xffE22323),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                               ),
-                              child: Icon(
-                                Icons.kitchen,
-                                color: Colors.white,
-                              ),
+                              child: Icon(Icons.kitchen, color: Colors.white),
                             ),
                           ],
                         ),
