@@ -9,6 +9,7 @@ class OrderMenu extends StatefulWidget {
   final Function tambah;
   final Function totalHarga;
   final Function(BuildContext) popupKonfirBayar;
+  final Function(BuildContext) popupConnectPrint;
   final Function(BuildContext, Product) popupCatatanOrder;
   final Function(double) formatAngka;
   final Function(String) onNoteSaved;
@@ -25,7 +26,7 @@ class OrderMenu extends StatefulWidget {
     required this.formatAngka,
     required this.onNoteSaved,
     required this.popupCatatanOrder,
-    required this.isNoteFilled,
+    required this.isNoteFilled, required this.popupConnectPrint,
   }) : super(key: key);
 
   @override
@@ -77,6 +78,24 @@ class _OrderMenuState extends State<OrderMenu> {
                         color: Color(0xff0C085C),
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: IconButton(
+                      onPressed: () {
+                         widget.popupConnectPrint(context);
+                      },
+                      icon: Icon(
+                        Icons.print,
+                        color: Colors.white,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Color(0xffE22323),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
                     ),
                   ),

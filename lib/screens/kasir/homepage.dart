@@ -261,6 +261,49 @@ class _HomepageState extends State<Homepage> {
     print("Selected Products: ${selectedProducts}"); // Log produk yang dipilih
   }
 
+  void popupConnectPrint(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: Color(0xffE22323),
+              width: 2,
+            ),
+          ),
+          title: Text("isi Judul"),
+          content: Column(
+            children: [Text("AAAAAAAAA")],
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xffE22323),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "Batal",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void popupCatatanOrder(BuildContext context, Product product) {
     final size = MediaQuery.of(context).size;
     final TextEditingController _noteController = TextEditingController();
@@ -1180,6 +1223,7 @@ class _HomepageState extends State<Homepage> {
 
               // Order Menu
               OrderMenu(
+                popupConnectPrint: popupConnectPrint,
                 formatAngka: formatAngka, // Fungsi untuk memformat angka
                 selectedProducts: selectedProducts, // List produk yang dipilih
                 size: MediaQuery.of(context).size, // Ukuran layar
