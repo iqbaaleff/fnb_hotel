@@ -141,6 +141,11 @@ class _RiwayatState extends State<Riwayat> {
     });
   }
 
+  Future<void> _refresh() async {
+    await Future.delayed(Duration(milliseconds: 500)); // opsional
+    await getTransaksi();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -200,133 +205,140 @@ class _RiwayatState extends State<Riwayat> {
                     CircularProgressIndicator(), // Tampilkan loader saat data masih kosong
               )
             : Center(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical, // Agar tabel bisa digulir
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      dataRowColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.grey[200]!),
-                      headingRowColor: MaterialStateColor.resolveWith(
-                          (states) => const Color(0xffE22323)),
-                      columns: [
-                        DataColumn(
-                            label: Text(
-                          'Order No',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Tanggal',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Atas Nama',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Kasir',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Catatan',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Layanan 10%',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'PPN 5%',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Total',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Subtotal',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Aksi',
-                          style: TextStyle(color: Colors.white),
-                        )), // Kolom aksi
-                      ],
-                      rows: transaksiList.map((transaksi) {
-                        return DataRow(cells: [
-                          // Menggunakan indeks dari transaksiList untuk membuat auto increment
-                          DataCell(Text((transaksiList.indexOf(transaksi) + 1)
-                              .toString())), // Mulai dari 1
-                          DataCell(Text(formatDate(
-                              transaksi['createdAt']))), // Format tanggal
-                          DataCell(Text(transaksi['nama'] ?? '-')),
-                          DataCell(Text(transaksi['namaKasir'] ?? '-')),
-                          DataCell(Text(transaksi['tambahan'] ?? '-')),
-                          DataCell(Text('Rp ${transaksi['ppn'] ?? '0'}')),
-                          DataCell(Text('Rp ${transaksi['layanan'] ?? '0'}')),
-                          DataCell(Text('Rp ${transaksi['total'] ?? '0'}')),
-                          DataCell(Text('Rp ${transaksi['subTotal'] ?? '0'}')),
-                          // Kolom aksi dengan tombol hapus
-                          DataCell(
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                // Menanyakan konfirmasi sebelum menghapus
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('Konfirmasi Hapus'),
-                                    content: Text(
-                                        'Apakah Anda yakin ingin menghapus transaksi ini?'),
-                                    actions: [
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(25)),
+                    physics: AlwaysScrollableScrollPhysics(),
+                    scrollDirection: Axis.vertical, // Agar tabel bisa digulir
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        dataRowColor: MaterialStateColor.resolveWith(
+                            (states) => Colors.grey[200]!),
+                        headingRowColor: MaterialStateColor.resolveWith(
+                            (states) => const Color(0xffE22323)),
+                        columns: [
+                          DataColumn(
+                              label: Text(
+                            'Order No',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Tanggal',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Atas Nama',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Kasir',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Catatan',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Layanan 10%',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'PPN 5%',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Total',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Subtotal',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Aksi',
+                            style: TextStyle(color: Colors.white),
+                          )), // Kolom aksi
+                        ],
+                        rows: transaksiList.map((transaksi) {
+                          return DataRow(cells: [
+                            // Menggunakan indeks dari transaksiList untuk membuat auto increment
+                            DataCell(Text((transaksiList.indexOf(transaksi) + 1)
+                                .toString())), // Mulai dari 1
+                            DataCell(Text(formatDate(
+                                transaksi['createdAt']))), // Format tanggal
+                            DataCell(Text(transaksi['nama'] ?? '-')),
+                            DataCell(Text(transaksi['namaKasir'] ?? '-')),
+                            DataCell(Text(transaksi['tambahan'] ?? '-')),
+                            DataCell(Text('Rp ${transaksi['ppn'] ?? '0'}')),
+                            DataCell(Text('Rp ${transaksi['layanan'] ?? '0'}')),
+                            DataCell(Text('Rp ${transaksi['total'] ?? '0'}')),
+                            DataCell(
+                                Text('Rp ${transaksi['subTotal'] ?? '0'}')),
+                            // Kolom aksi dengan tombol hapus
+                            DataCell(
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  // Menanyakan konfirmasi sebelum menghapus
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Konfirmasi Hapus'),
+                                      content: Text(
+                                          'Apakah Anda yakin ingin menghapus transaksi ini?'),
+                                      actions: [
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(25)),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text(
+                                            'Batal',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text(
-                                          'Batal',
-                                          style: TextStyle(color: Colors.white),
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(25)),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            hapusTransaksi(transaksi['id']);
+                                          },
+                                          child: Text(
+                                            'Hapus',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
                                         ),
-                                      ),
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(25)),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                          hapusTransaksi(transaksi['id']);
-                                        },
-                                        child: Text(
-                                          'Hapus',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ]);
-                      }).toList(),
+                          ]);
+                        }).toList(),
+                      ),
                     ),
                   ),
                 ),

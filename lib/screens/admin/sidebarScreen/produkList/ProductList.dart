@@ -166,6 +166,11 @@ class _ProductListState extends State<ProductList> {
     _fetchProducts();
   }
 
+  Future<void> _refresh() async {
+    await Future.delayed(Duration(milliseconds: 500)); // opsional
+    await _fetchProducts();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -220,152 +225,161 @@ class _ProductListState extends State<ProductList> {
           ? const Center(child: CircularProgressIndicator())
           : _produkList.isEmpty
               ? const Center(child: Text('Tidak ada data produk'))
-              : Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 25),
-                      child: Container(
-                        width: 300,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AddProduct(),
-                                ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xffE22323),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+              : RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 25),
+                          child: Container(
+                            width: 300,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AddProduct(),
+                                    ));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xffE22323),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                  ),
+                                  Text(
+                                    "Tambah Produk",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add,
-                                color: Colors.white,
+                        ),
+                        Center(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                dataRowColor: MaterialStateColor.resolveWith(
+                                    (states) => Colors.grey[200]!),
+                                headingRowColor: MaterialStateColor.resolveWith(
+                                    (states) => const Color(0xffE22323)),
+                                columns: const [
+                                  DataColumn(
+                                      label: Text(
+                                    'No',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                                  DataColumn(
+                                      label: Text(
+                                    'Foto',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                                  DataColumn(
+                                      label: Text(
+                                    'Judul Produk',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                                  DataColumn(
+                                      label: Text(
+                                    'Harga',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                                  DataColumn(
+                                      label: Text(
+                                    'Stok',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                                  DataColumn(
+                                      label: Text(
+                                    'Kategori',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                                  DataColumn(
+                                      label: Text(
+                                    'Aksi',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                                ],
+                                rows: _produkList.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final produk = entry.value;
+                                  return DataRow(cells: [
+                                    DataCell(Text('${index + 1}')),
+                                    DataCell(
+                                      produk['foto_produk'] != null
+                                          ? Image.network(
+                                              'https://zshnvs5v-3000.asse.devtunnels.ms${produk['foto_produk']}',
+                                              width: 50,
+                                              height: 50,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error,
+                                                      stackTrace) =>
+                                                  const Icon(Icons
+                                                      .image_not_supported),
+                                            )
+                                          : const Icon(
+                                              Icons.image_not_supported),
+                                    ),
+                                    DataCell(
+                                        Text(produk['judul_produk'] ?? '-')),
+                                    DataCell(Text(
+                                        'Rp ${produk['hargaJual']?.toString() ?? '-'}')),
+                                    DataCell(Text(
+                                        produk['stok']?.toString() ?? '-')),
+                                    DataCell(
+                                        Text(produk['kategori_produk'] ?? '-')),
+                                    DataCell(Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.red),
+                                          onPressed: () {
+                                            _confirmDelete(produk['id']);
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.edit,
+                                              color: Colors.blue),
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EditProduct(
+                                                        productData: produk),
+                                              ),
+                                            ).then((success) {
+                                              if (success == true) {
+                                                // Refresh data produk jika diperlukan
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    )),
+                                  ]);
+                                }).toList(),
                               ),
-                              Text(
-                                "Tambah Produk",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              )
-                            ],
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    Center(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                            dataRowColor: MaterialStateColor.resolveWith(
-                                (states) => Colors.grey[200]!),
-                            headingRowColor: MaterialStateColor.resolveWith(
-                                (states) => const Color(0xffE22323)),
-                            columns: const [
-                              DataColumn(
-                                  label: Text(
-                                'No',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Foto',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Judul Produk',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Harga',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Stok',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Kategori',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Aksi',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                            ],
-                            rows: _produkList.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final produk = entry.value;
-                              return DataRow(cells: [
-                                DataCell(Text('${index + 1}')),
-                                DataCell(
-                                  produk['foto_produk'] != null
-                                      ? Image.network(
-                                          'https://zshnvs5v-3000.asse.devtunnels.ms${produk['foto_produk']}',
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error,
-                                                  stackTrace) =>
-                                              const Icon(
-                                                  Icons.image_not_supported),
-                                        )
-                                      : const Icon(Icons.image_not_supported),
-                                ),
-                                DataCell(Text(produk['judul_produk'] ?? '-')),
-                                DataCell(Text(
-                                    'Rp ${produk['hargaJual']?.toString() ?? '-'}')),
-                                DataCell(
-                                    Text(produk['stok']?.toString() ?? '-')),
-                                DataCell(
-                                    Text(produk['kategori_produk'] ?? '-')),
-                                DataCell(Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          color: Colors.red),
-                                      onPressed: () {
-                                        _confirmDelete(produk['id']);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          color: Colors.blue),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => EditProduct(
-                                                productData: produk),
-                                          ),
-                                        ).then((success) {
-                                          if (success == true) {
-                                            // Refresh data produk jika diperlukan
-                                          }
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                )),
-                              ]);
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
     );
   }

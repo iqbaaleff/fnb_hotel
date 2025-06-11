@@ -99,6 +99,13 @@ class _CemilanState extends State<Cemilan> {
     });
   }
 
+  Future<void> _refresh() async {
+    await Future.delayed(Duration(seconds: 2)); // simulasi delay
+    
+    await _filteredProducts; // tambahkan item baru di awal
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -167,154 +174,158 @@ class _CemilanState extends State<Cemilan> {
                       );
                     }
 
-                    return GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 5,
-                        crossAxisCount: 5,
-                        childAspectRatio: 0.85,
-                      ),
-                      itemCount: _filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = _filteredProducts[index];
-                        final isOutOfStock =
-                            product.stok == null || product.stok! <= 0;
-                        return GestureDetector(
-                          onTap: () {
-                            if (!isOutOfStock) {
-                              widget.onProductSelected(product);
-                            } else {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    backgroundColor: Color(0xffE22323),
-                                    title: Text(
-                                      "Stok Habis",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    actions: [
-                                      Center(
-                                        child: TextButton(
-                                          style: TextButton.styleFrom(
-                                            backgroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "OK",
-                                            style: TextStyle(
-                                              color: Color(0xffE22323),
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: GridView.builder(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 5,
+                          crossAxisCount: 5,
+                          childAspectRatio: 0.85,
+                        ),
+                        itemCount: _filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          final product = _filteredProducts[index];
+                          final isOutOfStock =
+                              product.stok == null || product.stok! <= 0;
+                          return GestureDetector(
+                            onTap: () {
+                              if (!isOutOfStock) {
+                                widget.onProductSelected(product);
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      backgroundColor: Color(0xffE22323),
+                                      title: Text(
+                                        "Stok Habis",
+                                        style: TextStyle(
+                                          color: Colors.white,
                                         ),
+                                        textAlign: TextAlign.center,
                                       ),
-                                    ],
-                                  );
-                                },
-                              );
-                            }
-                          },
-                          child: Opacity(
-                            opacity: isOutOfStock ? 0.5 : 1.0,
-                            child: Card(
-                              color: isOutOfStock
-                                  ? Colors.grey[300]
-                                  : Colors.white,
-                              elevation: isOutOfStock ? 1 : 2,
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: product.fotoProduk != null &&
-                                              product.fotoProduk!.isNotEmpty
-                                          ? Image.network(
-                                              'https://zshnvs5v-3000.asse.devtunnels.ms${product.fotoProduk!}',
-                                              fit: BoxFit.fill,
-                                              width: double.infinity,
-                                            )
-                                          : Container(
-                                              color: Colors.grey[200],
-                                              child: const Icon(
-                                                  Icons.image_not_supported),
-                                            ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      left: widget.size.width * 0.007,
-                                      right: widget.size.width * 0.007,
-                                      bottom: widget.size.height * 0.02,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                            top: widget.size.height * 0.005,
-                                          ),
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical:
-                                                  widget.size.height * 0.005,
+                                      actions: [
+                                        Center(
+                                          child: TextButton(
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
                                             ),
                                             child: Text(
-                                              product.judulProduk,
-                                              textAlign: TextAlign.center,
+                                              "OK",
                                               style: TextStyle(
-                                                color: isOutOfStock
-                                                    ? Colors.grey
-                                                    : Color(0xff0C085C),
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xffE22323),
                                               ),
                                             ),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
                                           ),
-                                        ),
-                                        Text(
-                                          "Rp. ${product.hargaJual != null ? widget.formatAngka(product.hargaJual!.toDouble()) : 'Tidak ada harga'}",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: isOutOfStock
-                                                ? Colors.grey
-                                                : Colors.grey.shade600,
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              "Stok: ${product.stok != null ? product.stok!.toString() : 'Kosong'}",
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: isOutOfStock
-                                                    ? Colors.grey
-                                                    : Colors.grey.shade600,
-                                              ),
-                                            ),
-                                          ],
                                         ),
                                       ],
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                            child: Opacity(
+                              opacity: isOutOfStock ? 0.5 : 1.0,
+                              child: Card(
+                                color: isOutOfStock
+                                    ? Colors.grey[300]
+                                    : Colors.white,
+                                elevation: isOutOfStock ? 1 : 2,
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: product.fotoProduk != null &&
+                                                product.fotoProduk!.isNotEmpty
+                                            ? Image.network(
+                                                'https://zshnvs5v-3000.asse.devtunnels.ms${product.fotoProduk!}',
+                                                fit: BoxFit.fill,
+                                                width: double.infinity,
+                                              )
+                                            : Container(
+                                                color: Colors.grey[200],
+                                                child: const Icon(
+                                                    Icons.image_not_supported),
+                                              ),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        left: widget.size.width * 0.007,
+                                        right: widget.size.width * 0.007,
+                                        bottom: widget.size.height * 0.02,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                              top: widget.size.height * 0.005,
+                                            ),
+                                            child: Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical:
+                                                    widget.size.height * 0.005,
+                                              ),
+                                              child: Text(
+                                                product.judulProduk,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: isOutOfStock
+                                                      ? Colors.grey
+                                                      : Color(0xff0C085C),
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            "Rp. ${product.hargaJual != null ? widget.formatAngka(product.hargaJual!.toDouble()) : 'Tidak ada harga'}",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: isOutOfStock
+                                                  ? Colors.grey
+                                                  : Colors.grey.shade600,
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                "Stok: ${product.stok != null ? product.stok!.toString() : 'Kosong'}",
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: isOutOfStock
+                                                      ? Colors.grey
+                                                      : Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     );
                   },
                 ),

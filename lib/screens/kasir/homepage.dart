@@ -980,68 +980,6 @@ class _HomepageState extends State<Homepage> {
                         child: Column(
                           children: [
                             Row(
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    KitchenPrinter.printKitchenOrder(
-                                      atasNama: aNamaController.text.trim(),
-                                      detailPesanan:
-                                          selectedProducts.map((product) {
-                                        return {
-                                          "item": product.judulProduk,
-                                          "jumlah": product.quantity,
-                                          "note": product.note ?? '-',
-                                        };
-                                      }).toList(),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xffE22323),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                  ),
-                                  child:
-                                      Icon(Icons.kitchen, color: Colors.white),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    double subtotal = subTotalHarga();
-
-                                    PdfGenerator.printThermalInvoice(
-                                      // 👈 ganti dari printInvoice ke printThermalInvoice
-                                      namaHotel: "Millenial Hotel",
-                                      alamat:
-                                          "Jl. Kolonel Masturi 300, RT.04/RW.14,\n Jambudipa, Kec. Cisarua,\n Kab. Bandung Barat,\n Jawa Barat",
-                                      tanggalTransaksi: DateTime.now()
-                                          .toString()
-                                          .split(' ')[0],
-                                      atasNama: aNamaController.text.trim(),
-                                      detailPesanan:
-                                          selectedProducts.map((product) {
-                                        return {
-                                          "item": product.judulProduk,
-                                          "harga": product.hargaJual,
-                                          "jumlah": product.quantity,
-                                          "note": product.note ?? '-',
-                                        };
-                                      }).toList(),
-                                      getBiayaLayanan: (subtotal) =>
-                                          subtotal * 0.11,
-                                      getPpn: (subtotal) => subtotal * 0.10,
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xffE22323),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                  ),
-                                  child: Icon(Icons.print, color: Colors.white),
-                                ),
-                              ],
-                            ),
-                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('Sub total:'),
