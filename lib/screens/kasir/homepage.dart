@@ -1090,8 +1090,9 @@ class _HomepageState extends State<Homepage> {
 
                                 PdfGenerator.printThermalInvoice(
                                   // 👈 ganti dari printInvoice ke printThermalInvoice
-                                  namaHotel: "Hotel Millenial",
-                                  alamat: "Jl. Contoh Alamat No. 123, Jakarta",
+                                  namaHotel: "Moskopi",
+                                  alamat:
+                                      "JI. Kolonel Masturi No.300, RT.04/ RW.14, Jambudipa, Kec. Cisarua, Kabupaten Bandung Barat, Jawa Barat, 40551",
                                   tanggalTransaksi:
                                       DateTime.now().toString().split(' ')[0],
                                   atasNama: aNamaController.text.trim(),
